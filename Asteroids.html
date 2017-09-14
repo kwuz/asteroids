@@ -1,0 +1,64 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 9</title>
+	<script type="text/javascript" src="phaser-ce-2.8.6/build/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+function preload() {
+	//load art assets
+    game.load.image('background', 'assets/background.png');
+	game.load.image('ship','assets/ship.png');		// Ship and other art is far too large, draw bt myself then
+	game.load.image('Asteroid','assets/Asteroid.png');
+	game.load.image('bullet','assets/bullet.png');
+	
+	
+}
+var ships;
+var Asteroids;
+var Bullets;
+var scoreText;
+
+function create() {
+	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
+	game.add.sprite(0,0,'background');//add background
+	
+	ships = game.add.group(); //We should have a ship group because there could be more than one ship
+	var singleship = ships.create(game.world.width/2,game.world.height/2,'ship');//use a for loop in future
+	game.physics.p2.enable(singleship);
+	
+	Asteroids = game.add.group();
+	for (var i = 0; i < 10; i++) {
+		var singleAsteroid = Asteroids.create(299+i*10,5,'Asteroid');
+		game.physics.p2.enable(singleAsteroid);
+	}
+	
+	
+	Bullets = game.add.group();//There are multiple bullets they should be created in update rather then here
+	var singleBullet = Bullets.create(100,5,'bullet');
+	game.physics.p2.enable(singleBullet);
+	scoreText = game.add.text(16, 16, 'test score', { fontSize: '32px', fill: '#900' });
+}	
+
+function update() {
+
+   
+
+}
+
+
+</script>
+
+</body>
+</html>
