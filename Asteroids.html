@@ -4,6 +4,8 @@
 	<meta charset="UTF-8" />
     <title>Phaser - Making your first game, part 9</title>
 	<script type="text/javascript" src="phaser-ce-2.8.6/build/phaser.min.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="ship.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -29,6 +31,8 @@ var ship;
 var Asteroids;
 var Bullets;
 var scoreText;
+var shipVelX;
+var shipVelY;
 
 function create() {
 	game.add.image(0,0,'background');//add background
@@ -39,7 +43,8 @@ function create() {
 	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
 	ship.anchor.setTo(0.5, 0.5);
 	game.physics.p2.enable(ship);
-
+	shipVelX = 0.0;
+	shipVelY = 0.0;
 	
 	/*
 	Asteroids = game.add.group(); //commented for testing
@@ -63,6 +68,9 @@ function update() {
 	game.debug.spriteInfo(ship, 32, 32);
 	ship.body.setZeroVelocity();
 	ship.body.angularVelocity = 0;
+	
+	ship.body.x = ship.body.x + shipVelX;
+	ship.body.y = ship.body.y + shipVelY;
    
     if (cursors.left.isDown)
     {
@@ -75,18 +83,23 @@ function update() {
 
     if (cursors.up.isDown)
     {
-    	ship.body.x
+    	//ship.body.moveUp(400);
+		if (shipVelX*shipVelX + shipVelY*shipVelY < 20*20) {
+			shipVelX += 0.05*Math.cos(ship.body.rotation);
+			shipVelY += 0.05*Math.sin(ship.body.rotation);
+		}
     }
     else if (cursors.down.isDown)
     {
-    	ship.body.moveDown(400);
+    	//ship.body.moveDown(400);
+		if (shipVelX>=0 || shipVelY >=0) {
+			shipVelX -= 0.05*Math.cos(ship.body.rotation);
+			shipVelY -= 0.05*Math.sin(ship.body.rotation);
+		}
     }
-	
-
 }
 
 
 </script>
-
 </body>
 </html>
