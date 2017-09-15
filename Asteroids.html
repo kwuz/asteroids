@@ -25,35 +25,63 @@ function preload() {
 	
 	
 }
-var ships;
+var ship;
 var Asteroids;
 var Bullets;
 var scoreText;
 
 function create() {
+	game.add.image(0,0,'background');//add background
+
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
-	game.add.sprite(0,0,'background');//add background
+
 	
-	ships = game.add.group(); //We should have a ship group because there could be more than one ship
-	var singleship = ships.create(game.world.width/2,game.world.height/2,'ship');//use a for loop in future
-	game.physics.p2.enable(singleship);
+	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
+	ship.anchor.setTo(0.5, 0.5);
+	game.physics.p2.enable(ship);
+
 	
-	Asteroids = game.add.group();
-	for (var i = 0; i < 10; i++) {
+	/*
+	Asteroids = game.add.group(); //commented for testing
+	for (var i = 9; i < 10; i++) {
 		var singleAsteroid = Asteroids.create(299+i*10,5,'Asteroid');
 		game.physics.p2.enable(singleAsteroid);
 	}
-	
-	
+	*/
+		
 	Bullets = game.add.group();//There are multiple bullets they should be created in update rather then here
 	var singleBullet = Bullets.create(100,5,'bullet');
 	game.physics.p2.enable(singleBullet);
+	
 	scoreText = game.add.text(16, 16, 'test score', { fontSize: '32px', fill: '#900' });
+	
+	cursors = game.input.keyboard.createCursorKeys();
 }	
 
 function update() {
-
+	game.debug.text('in game status', 32, 200);
+	game.debug.spriteInfo(ship, 32, 32);
+	ship.body.setZeroVelocity();
+	ship.body.angularVelocity = 0;
    
+    if (cursors.left.isDown)
+    {
+		ship.body.rotateLeft(20);
+    }
+    else if (cursors.right.isDown)
+    {
+		ship.body.rotateRight(20);
+    }
+
+    if (cursors.up.isDown)
+    {
+    	ship.body.x
+    }
+    else if (cursors.down.isDown)
+    {
+    	ship.body.moveDown(400);
+    }
+	
 
 }
 
