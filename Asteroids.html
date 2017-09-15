@@ -46,13 +46,13 @@ function create() {
 	shipVelX = 0.0;
 	shipVelY = 0.0;
 	
-	/*
+	
 	Asteroids = game.add.group(); //commented for testing
 	for (var i = 9; i < 10; i++) {
 		var singleAsteroid = Asteroids.create(299+i*10,5,'Asteroid');
 		game.physics.p2.enable(singleAsteroid);
 	}
-	*/
+	
 		
 	Bullets = game.add.group();//There are multiple bullets they should be created in update rather then here
 	var singleBullet = Bullets.create(100,5,'bullet');
@@ -64,39 +64,36 @@ function create() {
 }	
 
 function update() {
-	game.debug.text('in game status', 32, 200);
+	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	ship.body.setZeroVelocity();
 	ship.body.angularVelocity = 0;
-	
+		
 	ship.body.x = ship.body.x + shipVelX;
 	ship.body.y = ship.body.y + shipVelY;
    
     if (cursors.left.isDown)
     {
-		ship.body.rotateLeft(20);
+		ship.body.rotateLeft(100);
     }
     else if (cursors.right.isDown)
     {
-		ship.body.rotateRight(20);
+		ship.body.rotateRight(100);
     }
 
     if (cursors.up.isDown)
     {
     	//ship.body.moveUp(400);
-		if (shipVelX*shipVelX + shipVelY*shipVelY < 20*20) {
+		if (shipVelX*shipVelX + shipVelY*shipVelY < 8*3) {
 			shipVelX += 0.05*Math.cos(ship.body.rotation);
 			shipVelY += 0.05*Math.sin(ship.body.rotation);
 		}
     }
-    else if (cursors.down.isDown)
-    {
-    	//ship.body.moveDown(400);
-		if (shipVelX>=0 || shipVelY >=0) {
-			shipVelX -= 0.05*Math.cos(ship.body.rotation);
-			shipVelY -= 0.05*Math.sin(ship.body.rotation);
-		}
-    }
+	else{
+		shipVelX = shipVelX*0.95;
+		shipVelY = shipVelY*0.95;
+	}
+
 }
 
 
