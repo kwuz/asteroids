@@ -16,7 +16,7 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1600, 1200, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
 	//load art assets
@@ -35,11 +35,13 @@ var shipVelX;
 var shipVelY;
 var score = 0;
 var bmd;
+var count = 0;
 var points = {
-	'x': [ 32, 128, 256, 384, 512, 608 ],
-    'y': [ 240, 240, 240, 240, 240, 240 ]
+	'x': [ 30, 500, 1030, 500, 30 ],
+    'y': [ 200, 400,200,0, 200]
 }
-
+var pathx = [];
+var pathy = [];
 function create() {
 	//basic initiation
 	game.add.image(0,0,'background');//add background
@@ -48,11 +50,11 @@ function create() {
 	bmd = game.add.bitmapData(game.width,game.height);
 	bmd.addToWorld();
 	
-	var py = points.y;
+	/*var py = points.y;			//random them for testing
         for (var i = 0; i < py.length; i++)
         {
             py[i] = game.rnd.between(32, 432);
-        }
+        }*/
 	plot();
 	//create text
 	scoreText = game.add.text(game.world.centerX, game.world.centerY, "Score is " + score, { 
@@ -82,27 +84,43 @@ function create() {
 }	
 
 function update() {
+	 
 	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	ship.body.setZeroVelocity();
 	ship.body.angularVelocity = 0;
 		
-	ship.body.x = ship.body.x + shipVelX;
-	ship.body.y = ship.body.y + shipVelY;
+	//ship.body.x = ship.body.x + shipVelX;
+	//ship.body.y = ship.body.y + shipVelY;
    
     if (cursors.left.isDown)
     {
-		updateScore(100);
-		ship.body.rotateLeft(100);
-    }
+		//updateScore(100);
+		ship.body.x = pathx[count];
+		ship.body.y = pathy[count];
+		count++;
+
+		if (count >= pathx.length)
+		{
+			count = 0;
+		}
+		//ship.body.rotateLeft(100);
+	}
     else if (cursors.right.isDown)
     {
-		ship.body.rotateRight(100);
+		ship.body.x = pathx[count];
+		ship.body.y = pathy[count];
+		count--;
+
+		if (count <0)
+		{
+			count = pathx.length;
+		}
+		//ship.body.rotateRight(100);
     }
 
     if (cursors.up.isDown)
     {
-    	//ship.body.moveUp(400);
 		if (shipVelX*shipVelX + shipVelY*shipVelY < 8*3) {
 			shipVelX += 0.05*Math.cos(ship.body.rotation);
 			shipVelY += 0.05*Math.sin(ship.body.rotation);
@@ -121,27 +139,29 @@ function updateScore(addAmount){	// call this function to add score
 	scoreText.setText("Score is " + score);
 	}
 function plot(){
-		bmd.clear();
-        var x = 1 / game.width;
-        for (var i = 0; i <= 1; i += x)
+	bmd.clear();
+    var x = 1 / game.width;
+    for (var i = 0; i <= 1; i += x)
         {
             //var px = game.math.linearInterpolation(points.x, i);
             //var py = game.math.linearInterpolation(points.y, i);
 
-             //var px = game.math.bezierInterpolation(this.points.x, i);
-             //var py = game.math.bezierInterpolation(this.points.y, i);
+            //var px = game.math.bezierInterpolation(this.points.x, i);
+            //var py = game.math.bezierInterpolation(this.points.y, i);
 
             var px = game.math.catmullRomInterpolation(this.points.x, i);
             var py = game.math.catmullRomInterpolation(this.points.y, i);
 
             bmd.rect(px, py, 1, 1, 'rgba(255, 255, 255, 1)');
+			//point data is added to a path array
+			pathx.push(px);
+			pathy.push(py);
         }
 
-        for (var p = 0; p < points.x.length; p++)
+    for (var p = 0; p < points.x.length; p++)
         {
-            bmd.rect(points.x[p]-3, points.y[p]-3, 6, 6, 'rgba(255, 0, 0, 1)');
+            bmd.rect(points.x[p]-3, points.y[p]-3, 11, 11, 'rgba(255, 0, 0, 1)');
         }
-
 	}
 </script>
 </body>
