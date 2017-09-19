@@ -55,10 +55,9 @@ function create() {
 	
 	// create ship
 	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
-	ship.scale.setTo(0.2,0.2);
-	game.physics.p2.enable(ship);
+	ship.scale.set(0.2);
+	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
-	//ship.anchor.setTo(0.5, 0.5);
 	shipVelX = 0.0;
 	shipVelY = 0.0;
 	//create asteroid
@@ -78,7 +77,7 @@ function create() {
 	var singleBullet = Bullets.create(100,5,'bullet');
 	game.physics.p2.enable(singleBullet);
 	//get game input
-	ship.body.collides(asternoidCollisionGroup,updateScore(100),game);
+	ship.body.collides(asternoidCollisionGroup,updateScore, this);
 	cursors = game.input.keyboard.createCursorKeys();
 }	
 
@@ -118,7 +117,7 @@ function render(){
 	}
 	
 function updateScore(addAmount){	// call this function to add score 
-	score = score + addAmount;
+	score = score + 10;
 	scoreText.setText("Score is " + score);
 	}
 </script>
