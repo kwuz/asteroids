@@ -33,33 +33,38 @@ var Bullets;
 var scoreText;
 var shipVelX;
 var shipVelY;
+var score = 0;
+var text
 
 function create() {
+	//basic initiation
 	game.add.image(0,0,'background');//add background
-
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 
+	//create text
+	text = game.add.text(game.world.centerX, game.world.centerY, "Score is " + score, { 
+		font: "65px Arial", 
+		fill: "#ff0044", 
+		align: "center" });
+    text.anchor.setTo(0.5, 0.5);
 	
+	// create ship
 	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
 	ship.anchor.setTo(0.5, 0.5);
 	game.physics.p2.enable(ship);
 	shipVelX = 0.0;
 	shipVelY = 0.0;
-	
-	
+	//create asteroid
 	Asteroids = game.add.group(); //commented for testing
 	for (var i = 9; i < 10; i++) {
 		var singleAsteroid = Asteroids.create(299+i*10,5,'Asteroid');
 		game.physics.p2.enable(singleAsteroid);
 	}
-	
-		
+	//create bullet
 	Bullets = game.add.group();//There are multiple bullets they should be created in update rather then here
 	var singleBullet = Bullets.create(100,5,'bullet');
 	game.physics.p2.enable(singleBullet);
-	
-	scoreText = game.add.text(16, 16, 'test score', { fontSize: '32px', fill: '#900' });
-	
+	//get game input
 	cursors = game.input.keyboard.createCursorKeys();
 }	
 
@@ -74,6 +79,7 @@ function update() {
    
     if (cursors.left.isDown)
     {
+		updateScore(100);
 		ship.body.rotateLeft(100);
     }
     else if (cursors.right.isDown)
@@ -95,6 +101,11 @@ function update() {
 	}
 }
 function render(){
+	}
+	
+function updateScore(addAmount){
+	score = score + addAmount;
+	text.setText("Score is " + score);
 	}
 
 
