@@ -42,6 +42,7 @@ function create() {
 	game.physics.p2.setImpactEvents(true);
 	game.physics.p2.restitution = 0.8;
 
+	var shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	var asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
 	var bulletCollisionGroup = game.physics.p2.createCollisionGroup();
 	//create text
