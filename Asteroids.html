@@ -45,6 +45,7 @@ function create() {
 	var shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	var asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
 	var bulletCollisionGroup = game.physics.p2.createCollisionGroup();
+	game.physics.p2.updateBoundsCollisionGroup();
 	//create text
 	scoreText = game.add.text(game.world.centerX, game.world.centerY, "Score is " + score, { 
 		font: "65px Arial", 
@@ -62,10 +63,13 @@ function create() {
 	shipVelY = 0.0;
 	//create asteroid
 	Asteroids = game.add.group(); //commented for testing
+	Asteroids.enableBody = true;
+    Asteroids.physicsBodyType = Phaser.Physics.P2JS;
 	for (var i = 1; i < 10; i++) {
 		var singleAsteroid = Asteroids.create(game.world.randomX, game.world.randomY,'Asteroid');
 		singleAsteroid.scale.setTo(0.1,0.1);
-		game.physics.p2.enable(singleAsteroid);
+		singleAsteroid.body.setRectangle(40,40);
+		//game.physics.p2.enable(singleAsteroid);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
 	}
@@ -74,7 +78,7 @@ function create() {
 	var singleBullet = Bullets.create(100,5,'bullet');
 	game.physics.p2.enable(singleBullet);
 	//get game input
-	ship.body.collides(asternoidCollisionGroup,updateScore(100),this);
+	ship.body.collides(asternoidCollisionGroup,updateScore(100),game);
 	cursors = game.input.keyboard.createCursorKeys();
 }	
 
