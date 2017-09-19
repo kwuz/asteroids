@@ -34,7 +34,6 @@ var scoreText;
 var shipVelX;
 var shipVelY;
 var score = 0;
-var text
 
 function create() {
 	//basic initiation
@@ -42,11 +41,11 @@ function create() {
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 
 	//create text
-	text = game.add.text(game.world.centerX, game.world.centerY, "Score is " + score, { 
+	scoreText = game.add.text(game.world.centerX, game.world.centerY, "Score is " + score, { 
 		font: "65px Arial", 
 		fill: "#ff0044", 
 		align: "center" });
-    text.anchor.setTo(0.5, 0.5);
+    scoreText.anchor.setTo(0.5, 0.5);
 	
 	// create ship
 	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
@@ -103,12 +102,10 @@ function update() {
 function render(){
 	}
 	
-function updateScore(addAmount){
+function updateScore(addAmount){	// call this function to add score 
 	score = score + addAmount;
-	text.setText("Score is " + score);
+	scoreText.setText("Score is " + score);
 	}
-
-
 </script>
 </body>
 </html>
