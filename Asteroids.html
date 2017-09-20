@@ -93,7 +93,7 @@ function create() {
 		singleAsteroid.scale.setTo(0.2,0.2);
 		singleAsteroid.body.setRectangle(40,40);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
-		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
+		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup]);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
 	});
@@ -108,7 +108,7 @@ function create() {
 	singleUFO.visible = false;
 	singleUFO.body.setRectangle(40,40);
 	singleUFO.body.setCollisionGroup(ufoCollisionGroup);
-	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
+	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup]);
 	singleUFO.body.rotateLeft(game.rnd.integerInRange(100, 200));
 	singleUFO.body.damping = 0.0;
 	singleUFO.body.velocity.x = 30;
@@ -136,6 +136,7 @@ function create() {
 		singleUFO.visible = true;
 	}, this);
 	ship.body.collides(asternoidCollisionGroup,updateScore, this);
+	ship.body.collides(ufoCollisionGroup,null, this);
 	cursors = game.input.keyboard.createCursorKeys();
 }	
 
@@ -156,9 +157,10 @@ function update() {
 		if(singleAsteroid.body.y > 600){
 			singleAsteroid.body.y = 0;
 		}else if(singleAsteroid.body.y < 0){
-			singleAsteroid.body.y = 800;
+			singleAsteroid.body.y = 600;
 		}
 	});
+	
    
     if (cursors.left.isDown)
     {
@@ -203,12 +205,21 @@ function updateScore(body1,body2){	// call this function to add score
 	score = score + 10;
 	scoreText.setText("Score is " + score);
 	
-	var singleAsteroid = Asteroids.create(body2.sprite.x,body2.sprite.y,'Asteroid');
+	/*var singleAsteroid = Asteroids.create(body2.sprite.x,body2.sprite.y,'Asteroid');
 	singleAsteroid.body.rotation = body2.sprite.rotation;
 	singleAsteroid.body.velocity = body2.sprite.velocity;
 	singleAsteroid.scale.setTo(0.1,0.1);
 	singleAsteroid.body.setRectangle(40,40);
 	singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+	singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
+	singleAsteroid.body.damping = 0.0;
+	singleAsteroid.body.thrust(500);*/
+	var singleAsteroid = UFOs.create(body2.sprite.x,body2.sprite.y,'Asteroid');
+	singleAsteroid.body.rotation = body2.sprite.rotation;
+	singleAsteroid.body.velocity = body2.sprite.velocity;
+	singleAsteroid.scale.setTo(0.1,0.1);
+	singleAsteroid.body.setRectangle(40,40);
+	singleAsteroid.body.setCollisionGroup(ufoCollisionGroup);
 	singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
 	singleAsteroid.body.damping = 0.0;
 	singleAsteroid.body.thrust(500);
