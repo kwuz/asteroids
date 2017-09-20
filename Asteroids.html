@@ -22,7 +22,7 @@ function preload() {
 	//load art assets
     game.load.image('background', 'assets/background.png');
 	game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
-	game.load.image('Asteroid','assets/OG_Sattelite.png');
+	game.load.image('Asteroid','assets/OG_Asteroid.png');
 	game.load.image('bullet','assets/bullet.png');
 	
 	
@@ -40,7 +40,7 @@ function create() {
 	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
-    game.physics.p2.restitution = 0.8;
+    //game.physics.p2.restitution = 0.8;
 
 	var shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	var asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -72,6 +72,10 @@ function create() {
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup]);
 	}
+	Asteroids.forEach( function (singleAsteroid){
+		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+		singleAsteroid.body.thrust(game.rnd.integerInRange(5000, 9000));
+	});
 	//create bullet
 	Bullets = game.add.group();//There are multiple bullets they should be created in update rather then here
 	var singleBullet = Bullets.create(100,5,'bullet');
