@@ -68,6 +68,7 @@ function create() {
 	ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
+	ship.body.mass = 1;
 	shipVelX = 0.0;
 	shipVelY = 0.0;
 	//create asteroid
@@ -249,8 +250,8 @@ function destoryNupdate(body1,body2){	// call this function to add score
 	singleAsteroid.body.damping = 0.0;
 	singleAsteroid.body.thrust(500);*/
 	var singleAsteroid = Asteroids_2.create(body2.sprite.x,body2.sprite.y,'Asteroid');
-	singleAsteroid.body.rotation = body2.sprite.rotation;
-	singleAsteroid.body.velocity = body2.sprite.velocity;
+	//singleAsteroid.body.rotation = body2.sprite.rotation;
+	//singleAsteroid.body.velocity = body2.sprite.velocity;
 	singleAsteroid.scale.setTo(0.1,0.1);
 	singleAsteroid.body.setRectangle(40,40);
 	singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup_2);
