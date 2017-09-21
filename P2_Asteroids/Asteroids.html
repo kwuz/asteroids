@@ -26,6 +26,7 @@ function preload() {
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
+	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet.png',256,256,90);
 	
 }
 var ship;
@@ -54,6 +55,12 @@ function create() {
 	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
+	
+	TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'Torpedo');
+	TorpedoSprite.scale.set(0.1);
+	TorpedoSprite.animations.add('walk');
+	TorpedoSprite.animations.play('walk', 50, true);
+	//game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
     //game.physics.p2.restitution = 0.0;
 
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -130,7 +137,7 @@ function create() {
 	
 	var singlePLanet = planets.create(game.world.width/2 - 100,game.world.height/2 - 100,'planet');
 	singlePLanet.scale.setTo(0.3,0.3);
-	singlePLanet.body.setCircle(70);
+	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup]);
 	singlePLanet.body.mass = 20.0
