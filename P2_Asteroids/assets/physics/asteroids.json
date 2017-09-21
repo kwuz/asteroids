@@ -1,0 +1,29 @@
+{ 
+    
+    "OG_Asteroid": [
+        {   "density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 130.5,239, 265,389.5, 239.5,433, 234,435.5, 150,419.5, 98.5,365, 85.5,293 ]
+        },
+        {"density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 71.5,183, 144.5,99, 213,60.5, 214,60.5, 450.5,286, 74,188.5, 71,185.5 ]
+        },
+        {"density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 450.5,286, 365,163.5, 421,189.5 ]
+        },
+        {"density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 365,163.5, 450.5,286, 214,60.5, 306,106.5 ]
+        },
+        {"density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 415,398.5, 265,389.5, 130.5,239, 448.5,301, 425.5,398 ]
+        },
+        {"density": 2, "friction": 0, "bounce": 0, 
+					"filter": { "categoryBits": 1, "maskBits": 65535 },
+            "shape": [ 74,188.5, 450.5,286, 448.5,301, 130.5,239 ]
+        }
+    ]
+}
