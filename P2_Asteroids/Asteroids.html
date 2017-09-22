@@ -3,7 +3,7 @@
 <head> 
 	<meta charset="UTF-8" />
     <title>Phaser - Making your first game, part 9</title>
-	<script type="text/javascript" src="phaser-ce-2.8.6/build/phaser.min.js"></script>
+	<script type="text/javascript" src="phaser-2.6.2/build/phaser.min.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<script type="text/javascript" src="ship.js"></script>
     <style type="text/css">
@@ -25,7 +25,7 @@ function preload() {
 	game.load.image('Asteroid','assets/OG_Asteroid.png');
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
-	game.load.physics('physicsData', 'assets/physics/asteroids.json');
+	game.load.physics('physicsData', 'assets/physics/physicsData.json');
 	
 }
 var ship;
@@ -83,31 +83,33 @@ function create() {
 	var singleAsteroid = Asteroids.create(200,25,'Asteroid');
 	singleAsteroid.body.velocity.x = 30;
 	singleAsteroid.body.velocity.y = 30;
-	singleAsteroid.body.clearShapes();
-	singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
+	//singleAsteroid.body.clearShapes();
+	//singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 	
 	singleAsteroid = Asteroids.create(600,25,'Asteroid');
 	singleAsteroid.body.velocity.x = -30;
 	singleAsteroid.body.velocity.y = 30;
-	singleAsteroid.body.clearShapes();
-	singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
+	//singleAsteroid.body.clearShapes();
+	//singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 	
 	singleAsteroid = Asteroids.create(200,520,'Asteroid');
 	singleAsteroid.body.velocity.x = 30;
 	singleAsteroid.body.velocity.y = -30;
-	singleAsteroid.body.clearShapes();
-	singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
+	//singleAsteroid.body.clearShapes();
+	//singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 	
 	singleAsteroid = Asteroids.create(500,550,'Asteroid');
 	singleAsteroid.body.velocity.x = -30;
 	singleAsteroid.body.velocity.y = -30;
-	singleAsteroid.body.clearShapes();
-	singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
+	//singleAsteroid.body.clearShapes();
+	//singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 	
 	Asteroids.forEach(function(singleAsteroid){
-		singleAsteroid.scale.setTo(0.2,0.2);
 		//singleAsteroid.body.setRectangle(40,40);
+		singleAsteroid.body.clearShapes();
+		singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+		//singleAsteroid.scale.setTo(0.2,0.2);
 		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
@@ -118,7 +120,7 @@ function create() {
 	UFOs.enableBody = true;
     UFOs.physicsBodyType = Phaser.Physics.P2JS;
 	
-	var singleUFO = UFOs.create(200,25,'ufo');
+	/*var singleUFO = UFOs.create(200,25,'ufo');
 	singleUFO.scale.setTo(0.1,0.1);
 	singleUFO.visible = false;
 	singleUFO.body.setRectangle(40,40);
@@ -127,7 +129,7 @@ function create() {
 	singleUFO.body.rotateLeft(game.rnd.integerInRange(100, 200));
 	singleUFO.body.damping = 0.0;
 	singleUFO.body.velocity.x = 30;
-	singleUFO.body.velocity.y = 30;
+	singleUFO.body.velocity.y = 30;*/
 	
 	
 	bulletGroup = game.add.group();//There are multiple bullets they should be created in update rather then here
@@ -168,9 +170,9 @@ function create() {
 	game.physics.p2.enable(singleBullet);
 	*/
 	//get game input
-	game.time.events.add(Phaser.Timer.SECOND*2, function(){
+	/*game.time.events.add(Phaser.Timer.SECOND*2, function(){
 		singleUFO.visible = true;
-	}, this);
+	}, this);*/
 	ship.body.collides(asternoidCollisionGroup,destoryNupdate, this);
 	ship.body.collides(ufoCollisionGroup,destory, this);
 	ship.body.collides(asternoidCollisionGroup_2,null,this);
@@ -201,7 +203,7 @@ function update() {
 		}
 	});
 	
-		UFOs.forEach( function (ufo){
+		/*UFOs.forEach( function (ufo){
 		ufo.body.thrust(100);
 		if(ufo.body.x > 800){
 			ufo.body.x = 0;
@@ -213,7 +215,7 @@ function update() {
 		}else if(ufo.body.y < 0){
 			ufo.body.y = 600;
 		}
-	});
+	});*/
 	
 		/*Asteroids_2.forEach( function (singleAsteroid_2){
 		//singleAsteroid_2.body.thrust(100);
@@ -320,13 +322,13 @@ function bulletHite(body1,body2){
 		//bulletGroup.remove(body1.sprite);
 		//Asteroids.remove(body2.sprite);
 		
-		if(size == 0.2){
+		if(size == 1){
 			var singleAsteroid = Asteroids.create(x, y, 'Asteroid');
-			singleAsteroid.body.clearShapes();
-			singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
+			//singleAsteroid.body.clearShapes();
+			//singleAsteroid.body.loadPolygon('physicsData', 'OG_Asteroid');
 			
-			singleAsteroid.scale.setTo(0.1, 0.1);
-			//singleAsteroid.body.setRectangle(40,40);
+			singleAsteroid.scale.setTo(0.5, 0.5);
+			singleAsteroid.body.setRectangle(40,40);
 			singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
