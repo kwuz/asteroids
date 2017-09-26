@@ -191,6 +191,7 @@ function create() {
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	resetAsternoid();
 }	
 
 function update() {	
@@ -426,6 +427,24 @@ function accelerateToObject(obj1, obj2, speed) {
 		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
 		obj1.body.force.y = Math.sin(angle) * speed;
 		}
+}
+
+function resetAsternoid(){
+	game.time.events.loop(Phaser.Timer.SECOND*4, function(){
+		game.debug.text('Try respaw',200, 200);
+		/*Asteroids.forEach(function(singleAsteroid){
+			if(singleAsteroid.body.sprite.alive == false && singleAsteroid.body.sprite.x == 0.2 ){
+			singleAsteroid.reset(game.randomX,game.randomY);}
+		});*/
+		var deadAsterois = Asteroids.getFirstExists(false);
+		if(deadAsterois && deadAsterois.body.sprite.scale.x == 0.2){
+			game.debug.text('respawed',250, 200);
+			//deadAsterois.body.sprite.reset(game.randomX, game.randomY);
+			deadAsterois.body.sprite.alive = true;
+			deadAsterois.body.sprite.exists = true;
+			deadAsterois.body.sprite.visible = true;
+		}
+	}, this);
 }
 </script>
 </body>
