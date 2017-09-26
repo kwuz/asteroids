@@ -61,7 +61,7 @@ function create() {
 	TorpedoSprite.animations.add('walk');
 	TorpedoSprite.animations.play('walk', 50, true);
 	//game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
-    //game.physics.p2.restitution = 0.0;
+    game.physics.p2.restitution = 1.0;
 
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
