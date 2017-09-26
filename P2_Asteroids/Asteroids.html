@@ -333,6 +333,8 @@ function bulletHite(body1,body2){
 	//Asteroids.remove(body2.sprite);
 	
 	if(size == 0.2){
+		score = score + 50;
+		scoreText.setText("Score is " + score);
 		var singleAsteroid = Asteroids.create(x, y, 'Asteroid');
 		singleAsteroid.scale.setTo(0.1, 0.1);
 		singleAsteroid.body.setRectangle(40,40);
@@ -353,6 +355,8 @@ function bulletHite(body1,body2){
 	}
 	
 	if(size == 0.1){
+		score = score + 100;
+		scoreText.setText("Score is " + score);
 		var singleAsteroid = Asteroids.create(x, y, 'Asteroid');
 		singleAsteroid.scale.setTo(0.05, 0.05);
 		singleAsteroid.body.setRectangle(20,20);
@@ -371,10 +375,14 @@ function bulletHite(body1,body2){
 		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 	}
+	if(size == 0.05){
+		score = score + 200;
+		scoreText.setText("Score is " + score);
+		}
 
 }
 function destoryNupdate(body1,body2){	// call this function to add score 
-	score = score + 10;
+	//score = score + 10;
 	scoreText.setText("Score is " + score);
 	
 	/*var singleAsteroid = Asteroids.create(body2.sprite.x,body2.sprite.y,'Asteroid');
@@ -398,19 +406,19 @@ function destoryNupdate(body1,body2){	// call this function to add score
 	body2.sprite.kill();*/
 	}
 function destory(body1,body2){
-	score = score + 100;
+	//score = score + 100;
 	body2.sprite.kill();
 	}
 	
 function moveToPlanet (planet) { 
-     accelerateToObject(ship,planet,10000);  //start accelerateToObject on every bullet
+     accelerateToObject(ship,planet,120);  //start accelerateToObject on every bullet
 }
 	
 function accelerateToObject(obj1, obj2, speed) {
 	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
-	if(((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)) < 16000.0)
+	if(((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)) < 30000.0)
 		{
 		if (typeof speed === 'undefined') { speed = 60; }
 		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
