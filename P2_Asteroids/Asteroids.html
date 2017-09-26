@@ -193,7 +193,8 @@ function create() {
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }	
 
-function update() {
+function update() {	
+	planets.forEach(moveToPlanet,this);
 	//ship.body.setZeroVelocity();
 	ship.body.angularVelocity = 0;
 		
@@ -400,6 +401,24 @@ function destory(body1,body2){
 	score = score + 100;
 	body2.sprite.kill();
 	}
+	
+function moveToPlanet (planet) { 
+     accelerateToObject(ship,planet,10000);  //start accelerateToObject on every bullet
+}
+	
+function accelerateToObject(obj1, obj2, speed) {
+	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	game.debug.spriteInfo(ship, 32, 32);
+	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
+	if(((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)) < 16000.0)
+		{
+		if (typeof speed === 'undefined') { speed = 60; }
+		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
+		//obj1.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+		obj1.body.force.y = Math.sin(angle) * speed;
+		}
+}
 </script>
 </body>
 </html>
