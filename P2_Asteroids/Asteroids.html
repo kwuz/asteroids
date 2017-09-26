@@ -47,6 +47,8 @@ var planetCollisionGroup;
 var asternoidCollisionGroup_2;
 
 var bulletInterval = 0;
+var collisionGuard = [0, 0];
+var pathOrFree = true;
 
 var fireButton;
 var cursors;
@@ -265,6 +267,10 @@ function update() {
 			ship.body.velocity.y += 5*Math.sin(ship.body.rotation);
 		}
     }
+	if (cursors.down.isDown)
+    {
+		pathOrFree = !pathOrFree;
+    }
 	
 	if(ship.body.x > 800){
 		ship.body.x = 0;
@@ -416,21 +422,50 @@ function destory(body1,body2){
 	}
 	
 function moveToPlanet (planet) { 
-     accelerateToObject(ship,planet,1000);  //start accelerateToObject on every bullet
+	if(pathOrFree){
+		accelerateToObject(ship,planet,1800);
+	}else{	
+		accelerateToPath(ship,planet,10000);  //start accelerateToObject on every bullet
+	}
 }
 	
 function accelerateToObject(obj1, obj2, speed) {
+	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
 	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
-	if(((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)) < 30000.0)
-		{
+	if(distance < 40000.0 ){
 		if (typeof speed === 'undefined') { speed = 60; }
+		game.debug.text('such in', 350, 200);
 		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
 		//obj1.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
 		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
 		obj1.body.force.y = Math.sin(angle) * speed;
-		}
+	}	
+}
+
+function accelerateToPath(obj1, obj2, speed) {
+	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
+	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	game.debug.spriteInfo(ship, 32, 32);
+	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
+	if(distance < 120000.0 && distance > 25000.0){
+		if (typeof speed === 'undefined') { speed = 60; }
+		game.debug.text('such in', 350, 200);
+		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
+		//obj1.body.rotation = angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+		obj1.body.force.y = Math.sin(angle) * speed;
+	}
+	if(distance < 24000.0){
+		if (typeof speed === 'undefined') { speed = 60; }
+		game.debug.text('pushout', 300, 200);
+		var angle = -Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
+		//obj1.body.rotation = -angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+		obj1.body.force.y = Math.sin(angle) * speed;
+	}
+	
 }
 
 function resetAsternoid(){
