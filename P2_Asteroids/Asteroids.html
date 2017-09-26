@@ -412,7 +412,7 @@ function destory(body1,body2){
 	}
 	
 function moveToPlanet (planet) { 
-     accelerateToObject(ship,planet,120);  //start accelerateToObject on every bullet
+     accelerateToObject(ship,planet,180);  //start accelerateToObject on every bullet
 }
 	
 function accelerateToObject(obj1, obj2, speed) {
@@ -430,7 +430,7 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function resetAsternoid(){
-	game.time.events.loop(Phaser.Timer.SECOND*4, function(){
+	game.time.events.loop(Phaser.Timer.SECOND*3, function(){
 		game.debug.text('Try respaw',200, 200);
 		/*Asteroids.forEach(function(singleAsteroid){
 			if(singleAsteroid.body.sprite.alive == false && singleAsteroid.body.sprite.x == 0.2 ){
