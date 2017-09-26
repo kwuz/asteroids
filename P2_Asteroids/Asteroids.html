@@ -57,7 +57,7 @@ function create() {
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	
 	TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'Torpedo');
-	TorpedoSprite.scale.set(0.1);
+	TorpedoSprite.scale.set(0.5);
 	TorpedoSprite.animations.add('walk');
 	TorpedoSprite.animations.play('walk', 50, true);
 	//game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
@@ -82,7 +82,7 @@ function create() {
 	ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
-	ship.body.mass = 1;
+	ship.body.mass = 10;
 	shipVelX = 0.0;
 	shipVelY = 0.0;
 	//create asteroid
@@ -140,7 +140,7 @@ function create() {
 	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup]);
-	singlePLanet.body.mass = 20.0
+	singlePLanet.body.mass = 2000.0
 	singlePLanet.body.damping = 1.0;
 	//create bullet
 	bulletGroup = game.add.group();//There are multiple bullets they should be created in update rather then here
@@ -412,7 +412,7 @@ function destory(body1,body2){
 	}
 	
 function moveToPlanet (planet) { 
-     accelerateToObject(ship,planet,180);  //start accelerateToObject on every bullet
+     accelerateToObject(ship,planet,18000);  //start accelerateToObject on every bullet
 }
 	
 function accelerateToObject(obj1, obj2, speed) {
