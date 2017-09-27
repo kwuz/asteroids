@@ -127,8 +127,8 @@ function create() {
 		singleAsteroid.scale.setTo(0.2,0.2);
 		singleAsteroid.body.setRectangle(40,40);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
-		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
-		singleAsteroid.body.collides(planetCollisionGroup, hitNupdate, this);
+		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,bulletCollisionGroup,planetCollisionGroup]);
+		singleAsteroid.body.collides(planetCollisionGroup,hitNupdate, this);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
 	});
@@ -143,7 +143,7 @@ function create() {
 	singleUFO.visible = false;
 	singleUFO.body.setRectangle(40,40);
 	singleUFO.body.setCollisionGroup(ufoCollisionGroup);
-	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,planetCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,]);
+	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,planetCollisionGroup,bulletCollisionGroup,]);
 	singleUFO.body.rotateLeft(game.rnd.integerInRange(100, 200));
 	singleUFO.body.damping = 0.0;
 	singleUFO.body.velocity.x = 30;
@@ -158,7 +158,8 @@ function create() {
 	singlePLanet.scale.setTo(0.3,0.3);
 	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
-	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup]);
+	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,planetCollisionGroup]);
+	singlePLanet.body.collides(asternoidCollisionGroup,hitNupdate,this);
 	singlePLanet.body.mass = 2000.0
 	singlePLanet.body.damping = 1.0;
 	//create bullet
@@ -210,7 +211,16 @@ function create() {
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	//switchButton = game.input.keyboard.addKey(Phaser.Keyboard.DOWN)
+	switchButton = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+	switchButton.onDown.add(function(){
+		freeOrPath = !freeOrPath;
+		if(freeOrPath == false){firstHug = true;}
+		hug = false;
+		shipAngle = 0;
+		shipAnglerVelocity = 0;
+		shipAnglerAcce = 0.001;
+	},this)
+	game.input.keyboard.removeKeyCapture(Phaser.Keyboard.DOWN);
 	resetAsternoid();
 }	
 
@@ -273,7 +283,9 @@ function update() {
 		if(freeOrPath){
 			ship.body.rotateLeft(100);
 		}else{
-		shipAnglerVelocity += shipAnglerAcce;
+		if(shipAnglerVelocity < 0.20){
+			shipAnglerVelocity += shipAnglerAcce;
+		}
 		}
     }
     else if (cursors.right.isDown)
@@ -281,7 +293,9 @@ function update() {
 		if(freeOrPath){
 			ship.body.rotateRight(100);
 		}else{
-		shipAnglerVelocity -= shipAnglerAcce;
+		if(shipAnglerVelocity > -0.20){
+			shipAnglerVelocity -= shipAnglerAcce;
+		}
 		}
     }
 
@@ -295,7 +309,7 @@ function update() {
 			}
 		}
     }
-	if (cursors.down.isDown)
+	/*if (cursors.down.isDown)
     {
 		freeOrPath = !freeOrPath;
 		if(freeOrPath == false){firstHug = true;}
@@ -303,7 +317,7 @@ function update() {
 		shipAngle = 0;
 		shipAnglerVelocity = 0;
 		shipAnglerAcce = 0.001;
-    }
+    }*/
 	
 	if(hug){
 		if(firstHug){
@@ -311,11 +325,10 @@ function update() {
 			firstHug = false;
 			game.camera.shake(0.05, 500);
 		}
-		shipAngle += shipAnglerVelocity;
-		ship.body.rotation += shipAnglerVelocity;
-		ship.body.x = game.world.width/2 + shipRadius * Math.cos(shipAngle);
-		ship.body.y = game.world.height/2 + shipRadius * Math.sin(shipAngle);
-
+			shipAngle += shipAnglerVelocity;
+			ship.body.rotation += shipAnglerVelocity;
+			ship.body.x = game.world.width/2 + shipRadius * Math.cos(shipAngle);
+			ship.body.y = game.world.height/2 + shipRadius * Math.sin(shipAngle);
 		if(shipAngle > 2 * Math.PI){
 			shipAngle = shipAngle -  2 * Math.PI;
 		}
@@ -401,7 +414,7 @@ function bulletHite(body1,body2){
 			singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 			singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
-			singleAsteroid.body.collides(planetCollisionGroup, hitNupdate, this);
+			singleAsteroid.body.collides(planetCollisionGroup,hitNupdate, this);
 			singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		
 			singleAsteroid = Asteroids.create(x-20, y+20, 'Asteroid');
@@ -411,7 +424,7 @@ function bulletHite(body1,body2){
 			singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 			singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
-			singleAsteroid.body.collides(planetCollisionGroup, hitNupdate, this);
+			singleAsteroid.body.collides(planetCollisionGroup,hitNupdate, this);
 			singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		}
 	
@@ -425,7 +438,7 @@ function bulletHite(body1,body2){
 			singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 			singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
-			singleAsteroid.body.collides(planetCollisionGroup, hitNupdate, this);
+			singleAsteroid.body.collides(planetCollisionGroup,hitNupdate, this);
 			singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		
 			singleAsteroid = Asteroids.create(x-10, y+10, 'Asteroid');
@@ -435,7 +448,7 @@ function bulletHite(body1,body2){
 			singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 			singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 			singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,planetCollisionGroup]);
-			singleAsteroid.body.collides(planetCollisionGroup, hitNupdate, this);
+			singleAsteroid.body.collides(planetCollisionGroup,hitNupdate, this);
 			singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		}
 		if(size == 0.05){
@@ -477,7 +490,7 @@ function destory(body1,body2){
 function hitNupdate(body1,body2){
 	planetHealth = planetHealth - 10;
 	HealthText.setText("Planet health is " + planetHealth);
-	body2.sprite.kill();
+	//body2.sprite.kill();
 }
 function moveToPlanet (planet) { 
 	if(freeOrPath){
@@ -489,7 +502,7 @@ function moveToPlanet (planet) {
 	
 function accelerateToObject(obj1, obj2, speed) {
 	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
-	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
 	if(distance < 40000.0 ){
