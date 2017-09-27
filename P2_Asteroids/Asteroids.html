@@ -225,6 +225,7 @@ function create() {
 }	
 
 function update() {	
+	
 	planets.forEach(moveToPlanet,this);
 	//ship.body.setZeroVelocity();
 	ship.body.angularVelocity = 0;
@@ -321,10 +322,14 @@ function update() {
 	
 	if(hug){
 		if(firstHug){
-			ship.body.rotation = 0; 
+			//ship.body.angle = Math.atan2(ship.body.x - game.world.width/2,ship.body.y - game.world.height/2); 
+			ship.body.angle = Math.atan2(ship.body.y - game.world.height/2,ship.body.x - game.world.width/2)*180/Math.PI;
+			//ship.body.x = shipRadius*Math.cos(ship.body.angle)+game.world.width/2;
+			shipAngle = ship.body.angle*Math.PI/180;
 			firstHug = false;
 			game.camera.shake(0.05, 500);
 		}
+			
 			shipAngle += shipAnglerVelocity;
 			ship.body.rotation += shipAnglerVelocity;
 			ship.body.x = game.world.width/2 + shipRadius * Math.cos(shipAngle);
@@ -518,6 +523,7 @@ function accelerateToObject(obj1, obj2, speed) {
 function accelerateToPath(obj1, obj2, speed) {
 	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
 	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	game.debug.text("ship.body.angle = " + Math.atan2(ship.body.y - game.world.height/2,ship.body.x - game.world.width/2)*180/Math.PI,30,270);
 	game.debug.spriteInfo(ship, 32, 32);
 	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
 	if(distance < 200000.0 && distance > 12000.0){
