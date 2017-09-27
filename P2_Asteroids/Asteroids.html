@@ -283,7 +283,7 @@ function update() {
 		if(freeOrPath){
 			ship.body.rotateLeft(100);
 		}else{
-		if(shipAnglerVelocity < 0.20){
+		if(shipAnglerVelocity < 0.10){
 			shipAnglerVelocity += shipAnglerAcce;
 		}
 		}
@@ -293,7 +293,7 @@ function update() {
 		if(freeOrPath){
 			ship.body.rotateRight(100);
 		}else{
-		if(shipAnglerVelocity > -0.20){
+		if(shipAnglerVelocity > -0.10){
 			shipAnglerVelocity -= shipAnglerAcce;
 		}
 		}
