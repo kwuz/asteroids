@@ -30,6 +30,11 @@ function preload() {
 	
 }
 var ship;
+var shipRadius = 100;
+var shipAngle = 0;
+var shipAnglerVelocity = 0;
+var shipAnglerAcce = 0.001;
+
 var UFOs;
 var planets;
 var Asteroids;
@@ -48,7 +53,9 @@ var asternoidCollisionGroup_2;
 
 var bulletInterval = 0;
 var collisionGuard = [0, 0];
-var pathOrFree = true;
+var freeOrPath = true;
+var hug = false;
+var firstHug = false;
 
 var fireButton;
 var cursors;
@@ -63,7 +70,7 @@ function create() {
 	TorpedoSprite.animations.add('walk');
 	TorpedoSprite.animations.play('walk', 50, true);
 	//game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
-    game.physics.p2.restitution = 1.0;
+    game.physics.p2.restitution = 0.8;
 
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -80,7 +87,7 @@ function create() {
     scoreText.anchor.setTo(0.5, 0.5);
 	
 	// create ship
-	ship = game.add.sprite(game.world.width/2,game.world.height/2,'ship');
+	ship = game.add.sprite(game.world.width/2-100,game.world.height/2-100,'ship');
 	ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
@@ -137,7 +144,7 @@ function create() {
 	planets.enableBody = true;
     planets.physicsBodyType = Phaser.Physics.P2JS;
 	
-	var singlePLanet = planets.create(game.world.width/2 - 100,game.world.height/2 - 100,'planet');
+	var singlePLanet = planets.create(game.world.width/2,game.world.height/2,'planet');
 	singlePLanet.scale.setTo(0.3,0.3);
 	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
@@ -252,26 +259,56 @@ function update() {
     if (cursors.left.isDown)
     {
 		//updateScore(100);
-		ship.body.rotateLeft(100);
+		if(freeOrPath){
+			ship.body.rotateLeft(100);
+		}else{
+		shipAnglerVelocity += shipAnglerAcce;
+		}
     }
     else if (cursors.right.isDown)
     {
-		ship.body.rotateRight(100);
+		if(freeOrPath){
+			ship.body.rotateRight(100);
+		}else{
+		shipAnglerVelocity -= shipAnglerAcce;
+		}
     }
 
     if (cursors.up.isDown)
     {
     	//ship.body.moveUp(400);
-		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
-			ship.body.velocity.x += 5*Math.cos(ship.body.rotation);
-			ship.body.velocity.y += 5*Math.sin(ship.body.rotation);
+		if(freeOrPath){
+			if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
+				ship.body.velocity.x += 5*Math.cos(ship.body.rotation);
+				ship.body.velocity.y += 5*Math.sin(ship.body.rotation);
+			}
 		}
     }
 	if (cursors.down.isDown)
     {
-		pathOrFree = !pathOrFree;
+		freeOrPath = !freeOrPath;
+		if(freeOrPath == false){firstHug = true;}
+		hug = false;
+		shipAngle = 0;
+		shipAnglerVelocity = 0;
+		shipAnglerAcce = 0.001;
     }
 	
+	if(hug){
+		if(firstHug){
+		ship.body.rotation = 0; 
+		firstHug = false;
+		}
+		shipAngle += shipAnglerVelocity;
+		ship.body.rotation += shipAnglerVelocity;
+		ship.body.x = game.world.width/2 + shipRadius * Math.cos(shipAngle);
+		ship.body.y = game.world.height/2 + shipRadius * Math.sin(shipAngle);
+
+		if(shipAngle > 2 * Math.PI){
+			shipAngle = shipAngle -  2 * Math.PI;
+		}
+	}
+		
 	if(ship.body.x > 800){
 		ship.body.x = 0;
 	}else if(ship.body.x < 0){
@@ -422,7 +459,7 @@ function destory(body1,body2){
 	}
 	
 function moveToPlanet (planet) { 
-	if(pathOrFree){
+	if(freeOrPath){
 		accelerateToObject(ship,planet,1800);
 	}else{	
 		accelerateToPath(ship,planet,10000);  //start accelerateToObject on every bullet
@@ -449,21 +486,26 @@ function accelerateToPath(obj1, obj2, speed) {
 	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	game.debug.spriteInfo(ship, 32, 32);
 	game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
-	if(distance < 120000.0 && distance > 25000.0){
+	if(distance < 200000.0 && distance > 12000.0){
 		if (typeof speed === 'undefined') { speed = 60; }
 		game.debug.text('such in', 350, 200);
 		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
-		//obj1.body.rotation = angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.rotation = angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
 		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
 		obj1.body.force.y = Math.sin(angle) * speed;
 	}
-	if(distance < 24000.0){
+	else if(distance < 8000.0){
 		if (typeof speed === 'undefined') { speed = 60; }
 		game.debug.text('pushout', 300, 200);
 		var angle = -Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
-		//obj1.body.rotation = -angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.rotation = -angle + game.math.degToRad(180);  // correct angle of angry bullets (depends on the sprite used)
 		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
 		obj1.body.force.y = Math.sin(angle) * speed;
+	}
+	else if(distance = 10000.0){
+	// fetched with camera shaking
+	hug = true;
+	//ship.body.angle = Math.atan2(obj2.body.y - obj1.body.y,obj2.body.x - obj1.body.x);
 	}
 	
 }
