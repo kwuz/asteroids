@@ -58,6 +58,7 @@ var hug = false;
 var firstHug = false;
 
 var fireButton;
+var switchButton;
 var cursors;
 function create() {
 	//basic initiation
@@ -200,6 +201,7 @@ function create() {
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	//switchButton = game.input.keyboard.addKey(Phaser.Keyboard.DOWN)
 	resetAsternoid();
 }	
 
@@ -296,8 +298,9 @@ function update() {
 	
 	if(hug){
 		if(firstHug){
-		ship.body.rotation = 0; 
-		firstHug = false;
+			ship.body.rotation = 0; 
+			firstHug = false;
+			game.camera.shake(0.05, 500);
 		}
 		shipAngle += shipAnglerVelocity;
 		ship.body.rotation += shipAnglerVelocity;
@@ -505,6 +508,7 @@ function accelerateToPath(obj1, obj2, speed) {
 	else if(distance = 10000.0){
 	// fetched with camera shaking
 	hug = true;
+
 	//ship.body.angle = Math.atan2(obj2.body.y - obj1.body.y,obj2.body.x - obj1.body.x);
 	}
 	
