@@ -28,6 +28,7 @@ function preload() {
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
+	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
 	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet.png',256,256,90);
 	
 }
@@ -160,8 +161,8 @@ function create() {
 	bulletGroup.enableBody = true;
 	bulletGroup.physicsBodyType = Phaser.Physics.P2JS;
 	
-	//bulletGroup.createMultiple(2, 'Torpedo',[0,1,2,3,4,5,6,7,8,9,10,11]);
-	bulletGroup.createMultiple(30, 'bullet');
+	bulletGroup.createMultiple(5, 'baddie',[0,1,2,3]);
+	//bulletGroup.createMultiple(5, 'Torpedo',[0,1,2,3]);
     bulletGroup.setAll('anchor.x', 0.5);
     bulletGroup.setAll('anchor.y', 0.5);
 
@@ -171,8 +172,11 @@ function create() {
 		//singleBullet.body.sprite.key = 'Torpedo';
 		//TorpedoSprite.animations.add('glow');
 		//TorpedoSprite.animations.play('glow', 50, true);
-		singleBullet.scale.setTo(0.1,0.1);
+		//singleBullet.scale.setTo(0.1,0.1);
 		//singleBullet.body.setRectangle(40,40);
+		//Baddie = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'baddie');
+		//singleBullet.body.sprite.key = 'baddie';
+		
 		singleBullet.body.setCollisionGroup(bulletCollisionGroup);
 		singleBullet.body.collides(asternoidCollisionGroup, bulletHite, this);
 		singleBullet.body.collides(planetCollisionGroup, planetHite, this);
@@ -380,7 +384,7 @@ if (cursors.up.isDown && shipAniFlag == false)
 		if(shipInOrbit == false){
 			ship.body.rotateLeft(100);
 		}
-		else if(shipAnglerVelocity >= -5){
+		else if(shipAnglerVelocity >= -3){
 			shipAnglerVelocity -= shipAnglerAcce;
 		}
 		
@@ -390,9 +394,8 @@ if (cursors.up.isDown && shipAniFlag == false)
 		if(shipInOrbit == false){
 			ship.body.rotateRight(100);
 		}
-		else if(shipAnglerVelocity <= 5){
+		else if(shipAnglerVelocity <= 3){
 			shipAnglerVelocity += shipAnglerAcce;
-		
 		}	
     }
 
