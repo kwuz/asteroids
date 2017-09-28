@@ -429,7 +429,7 @@ if (cursors.up.isDown && shipAniFlag == false)
                 bullet.body.rotation = ship.body.rotation;
                 bullet.body.velocity.x = 400 * Math.cos(ship.body.rotation);
                 bullet.body.velocity.y = 400 * Math.sin(ship.body.rotation);
-                bulletInterval = game.time.now + 100;
+                bulletInterval = game.time.now + 200;// bullet interval
             }
 		}
     	
@@ -535,6 +535,11 @@ function checkForRespaw(){
 		deadAsterois.body.sprite.alive = true;
 		deadAsterois.body.sprite.exists = true;
 		deadAsterois.body.sprite.visible = true;
+		var random = game.rnd.between(1,4);
+		if(random == 1){deadAsterois.body.x = 0;}
+		if(random == 2){deadAsterois.body.y =0;}
+		if(random == 3){deadAsterois.body.x = game.world.width;}
+		if(random == 4){deadAsterois.body.y = game.world.height;}
 		Asteroid_countNum ++;
 	}
 	}
