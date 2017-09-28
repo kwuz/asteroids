@@ -531,6 +531,8 @@ function accelerateToObject(obj1, obj2, speed) {
 
 function checkForRespaw(){
 	if(Asteroid_countNum <= 3){
+		var deadAsterois = Asteroids.getFirstExists(false);
+		deadAsterois.body.sprite.key = 'Asteroid';
 		
 	}
 	}
