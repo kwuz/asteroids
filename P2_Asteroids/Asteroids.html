@@ -22,7 +22,9 @@ function preload() {
 	//load art assets
     game.load.image('background', 'assets/background.png');
 	game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
-	game.load.image('Asteroid','assets/OG_Asteroid.png');
+	game.load.image('Asteroid','assets/OG_Asteroid_large.png');
+	game.load.image('Asteroid_medium','assets/OG_Asteroid_large.png');
+	game.load.image('Asteroid_small','assets/OG_Asteroid_large.png');
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
@@ -47,13 +49,13 @@ var scoreText;
 var shipVelX;
 var shipVelY;
 var score = 100;
+var Asteroid_countNum = 4;
 
 var shipCollisionGroup;
 var asternoidCollisionGroup;
 var bulletCollisionGroup;
 var ufoCollisionGroup;
 var planetCollisionGroup;
-var asternoidCollisionGroup_2;
 
 var bulletInterval = 0;
 var collisionGuard = [0, 0];
@@ -124,6 +126,8 @@ function create() {
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
 	});
+	//create asteroid medium
+	
 	
 	//Create UFOs
 	UFOs = game.add.group(); //commented for testing
@@ -153,6 +157,7 @@ function create() {
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
 	singlePLanet.body.mass = 20.0
 	singlePLanet.body.damping = 1.0;
+	
 	//create bullet
 	bulletGroup = game.add.group();//There are multiple bullets they should be created in update rather then here
 	bulletGroup.enableBody = true;
@@ -430,18 +435,49 @@ function bulletHite(body1,body2){
 		collisionGuard[0] = body1.sprite.body.id;
 		collisionGuard[1] = body2.sprite.body.id;
 
-		var size = body2.sprite.scale.x;
+		//var size = body2.sprite.scale.x;
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
 		
 		body1.sprite.kill();
 		body2.sprite.kill();
+		Asteroid_countNum = Asteroid_countNum - 1;
+		
+		if(body2.sprite.key == 'Asteroid'){
+			for(var i = 0; i < 2; i++){
+				Asteroid_countNum ++;
+				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
+				singleAsteroid.scale.setTo(0.1, 0.1);
+				singleAsteroid.body.setRectangle(30,30);
+				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
+				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+			}
+		}
+		
+		if(body2.sprite.key == 'Asteroid_medium'){
+			for(var i = 0; i < 2; i++){
+				Asteroid_countNum ++;
+				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
+				singleAsteroid.scale.setTo(0.05, 0.05);
+				singleAsteroid.body.setRectangle(15,15);
+				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
+				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+			}
+		}
 		//body2.sprite.body.removeCollisionGroup(asternoidCollisionGroup);
 		//body1.sprite.body.removeCollisionGroup(bulletCollisionGroup);
 		
 		//bulletGroup.remove(body1.sprite);
 		//Asteroids.remove(body2.sprite);
-		if(size >= 0.1){
+		/*if(size >= 0.1){
 			for(var i = 0; i < 2; i++){
 					var singleAsteroid = Asteroids.create(x, y, 'Asteroid');
 				if(size == 0.2){
@@ -459,7 +495,7 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 			}
 			
-		}
+		}*/
 		
 	}
 
@@ -483,7 +519,7 @@ function accelerateToObject(obj1, obj2, speed) {
 	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
-	if(distance < 90000.0 ){
+	if(distance < 18000.0 ){
 		if (typeof speed === 'undefined') { speed = 60; }
 		game.debug.text('such in', 350, 200);
 		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
@@ -492,6 +528,12 @@ function accelerateToObject(obj1, obj2, speed) {
 		obj1.body.force.y = Math.sin(angle) * speed;
 	}	
 }
+
+function checkForRespaw(){
+	if(Asteroid_countNum <= 3){
+		
+	}
+	}
 
 </script>
 </body>
