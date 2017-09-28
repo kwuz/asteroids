@@ -175,9 +175,9 @@ function create() {
 	game.time.events.add(Phaser.Timer.SECOND*2, function(){
 		singleUFO.visible = true;
 	}, this);
-	//ship.body.collides(asternoidCollisionGroup,destoryNupdate, this);
+	ship.body.collides(asternoidCollisionGroup,destoryNupdate, this);
 	ship.body.collides(ufoCollisionGroup,null, this);
-	//ship.body.collides(planetCollisionGroup,null,this);
+	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }	
