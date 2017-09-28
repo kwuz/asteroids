@@ -445,11 +445,11 @@ function bulletHite(body1,body2){
 		Asteroid_countNum = Asteroid_countNum - 1;
 		checkForRespaw();
 		if(body2.sprite.key == 'Asteroid'){
+			var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
 			for(var i = 0; i < 2; i++){
 				Asteroid_countNum ++;
-				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
 				singleAsteroid.scale.setTo(0.1, 0.1);
-				singleAsteroid.body.setRectangle(30,30);
+				singleAsteroid.body.setRectangle(40,40);
 				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
@@ -460,11 +460,11 @@ function bulletHite(body1,body2){
 		}
 		
 		if(body2.sprite.key == 'Asteroid_medium'){
+			var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
 			for(var i = 0; i < 2; i++){
 				Asteroid_countNum ++;
-				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
 				singleAsteroid.scale.setTo(0.05, 0.05);
-				singleAsteroid.body.setRectangle(15,15);
+				singleAsteroid.body.setRectangle(40,40);
 				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
