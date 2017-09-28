@@ -188,6 +188,7 @@ function create() {
 }	
 
 function update() {
+	game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
@@ -442,7 +443,7 @@ function bulletHite(body1,body2){
 		body1.sprite.kill();
 		body2.sprite.kill();
 		Asteroid_countNum = Asteroid_countNum - 1;
-		
+		checkForRespaw();
 		if(body2.sprite.key == 'Asteroid'){
 			for(var i = 0; i < 2; i++){
 				Asteroid_countNum ++;
@@ -472,6 +473,7 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 			}
 		}
+	
 		//body2.sprite.body.removeCollisionGroup(asternoidCollisionGroup);
 		//body1.sprite.body.removeCollisionGroup(bulletCollisionGroup);
 		
@@ -533,7 +535,9 @@ function checkForRespaw(){
 	if(Asteroid_countNum <= 3){
 		var deadAsterois = Asteroids.getFirstExists(false);
 		deadAsterois.body.sprite.key = 'Asteroid';
-		
+		deadAsterois.body.sprite.alive = true;
+		deadAsterois.body.sprite.exists = true;
+		deadAsterois.body.sprite.visible = true;
 	}
 	}
 
