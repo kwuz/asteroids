@@ -153,7 +153,7 @@ function create() {
     planets.physicsBodyType = Phaser.Physics.P2JS;
 	
 	var singlePLanet = planets.create(game.world.width/2,game.world.height/2,'planet');
-	singlePLanet.scale.setTo(0.3,0.3);
+	singlePLanet.scale.setTo(0.2,0.2);
 	singlePLanet.body.setCircle(40);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
