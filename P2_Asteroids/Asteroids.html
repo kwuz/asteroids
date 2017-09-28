@@ -21,7 +21,7 @@ var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, creat
 function preload() {
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
-	game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
+	//game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
 	game.load.image('Asteroid','assets/Asteroid_large.png');
 	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
 	game.load.image('Asteroid_small','assets/Asteroid_large.png');
@@ -30,7 +30,12 @@ function preload() {
 	game.load.image('planet','assets/planet.png');
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
 	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_0.125x.png',32,32,90);
+	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
 	
+	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
+	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
+	game.load.audio('planetHit','assets/asteroids_planethit.wav');
+	game.load.audio('planetDestory','assets/asteroids_planetdestroy1.wav');
 }
 var ship;
 var shipRadius = 100;
@@ -64,12 +69,23 @@ var guard = true;
 
 var fireButton;
 var cursors;
+// These are sounds
+var blaster;
+var asterDestory;
+var planetHit;
+var planetDestory;
 function create() {
 	//basic initiation
 	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	
+	//create sound
+	blaster = game.add.audio('blaster');
+	asterDestory = game.add.audio('asternoidDestory');
+	planetHit = game.add.audio('planetHit');
+	planetDestory = game.add.audio('planetDestory');
+	//
 	//create spritesheet
 	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
 	TorpedoSprite.animations.add('glow');
@@ -93,7 +109,8 @@ function create() {
 
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
-	ship.scale.set(0.1);
+	ship.animations.add('rearLoop',[36,37,38,39,40,41,42,43],true);
+	//ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
 	ship.body.mass = 1;
@@ -103,21 +120,21 @@ function create() {
 	Asteroids = game.add.group(); //commented for testing
 	Asteroids.enableBody = true;
     Asteroids.physicsBodyType = Phaser.Physics.P2JS;
-	var singleAsteroid = Asteroids.create(200,25,'Asteroid');
-	singleAsteroid.body.velocity.x = 30;
-	singleAsteroid.body.velocity.y = 30;
+	var singleAsteroid = Asteroids.create(10,10,'Asteroid');
+	singleAsteroid.body.velocity.x = 300;
+	singleAsteroid.body.velocity.y = 300;
 	
 	singleAsteroid = Asteroids.create(600,25,'Asteroid');
 	singleAsteroid.body.velocity.x = -30;
 	singleAsteroid.body.velocity.y = 30;
 	
-	singleAsteroid = Asteroids.create(200,520,'Asteroid');
+	singleAsteroid = Asteroids.create(200,720,'Asteroid');
 	singleAsteroid.body.velocity.x = 30;
 	singleAsteroid.body.velocity.y = -30;
 	
-	singleAsteroid = Asteroids.create(500,550,'Asteroid');
-	singleAsteroid.body.velocity.x = -30;
-	singleAsteroid.body.velocity.y = -30;
+	singleAsteroid = Asteroids.create(1014,790,'Asteroid');
+	singleAsteroid.body.velocity.x = -300;
+	singleAsteroid.body.velocity.y = -300;
 	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
@@ -197,17 +214,12 @@ function create() {
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+	
+	game.sound.setDecodedCallback([blaster], start, this);
 }	
 
 function update() {
-	if (score <= 0){
-	scoreText.setText('GameOver!');
-	scoreText.x = game.world.width/2;
-	scoreText.y = game.world.height/2-200;
-	scoreText.fontSize = 100;
-	//game.kill();
-	}
-		
+	ship.animations.stop();
 	//game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
@@ -415,11 +427,11 @@ if (cursors.up.isDown && shipAniFlag == false)
 		ship.body.y = 800;
 	}
 	if (fireButton.isDown){
-
 		
 		if (game.time.now > bulletInterval) {
 			var bullet = bulletGroup.getFirstExists(false);
     		if (bullet) {
+				blaster.play();
                 var length = ship.width * 0.5;
                 var x = ship.body.x + (Math.cos(ship.body.rotation) * length);
                 var y = ship.body.y + (Math.sin(ship.body.rotation) * length);
@@ -461,6 +473,7 @@ function bulletHite(body1,body2){
 		var y = body2.sprite.body.y;
 		
 		body1.sprite.kill();
+		asterDestory.play();
 		checkForRespaw();
 		Asteroid_countNum = Asteroid_countNum - 1;
 			
@@ -502,7 +515,17 @@ function destoryNupdate(body1,body2){	// call this function to add score
 	body1.sprite.kill();
 	Asteroid_countNum = Asteroid_countNum -1;
 	checkForRespaw();
+	planetHit.play();
 	game.camera.shake(0.03, 100);
+	
+	if (score <= 0){
+	scoreText.setText('GameOver!');
+	scoreText.x = game.world.width/2;
+	scoreText.y = game.world.height/2-200;
+	scoreText.fontSize = 100;
+	planetDestory.play();
+	//game.kill();
+		}
 	}
 function destory(body1,body2){
 	//score = score + 100;
