@@ -66,6 +66,7 @@ var planetCollisionGroup;
 var bulletInterval = 0;
 //var collisionGuard = [0, 0];
 var guard = true;
+var playProtectAnimation = false;
 
 var fireButton;
 var cursors;
@@ -109,7 +110,12 @@ function create() {
 
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
-	ship.animations.add('rearLoop',[36,37,38,39,40,41,42,43],true);
+	ship.animations.add('protect',[6,13,20,27,34,41],true);
+	ship.animations.add('moveLeft',[2,9,16],true);
+	ship.animations.add('moveRight',[4,11,18],true);
+	ship.animations.add('moveForward',[1,8,15,22,29,36],true);
+	ship.animations.stop();
+	ship.frame = 1;
 	//ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
@@ -209,7 +215,7 @@ function create() {
 	game.time.events.add(Phaser.Timer.SECOND*2, function(){
 		singleUFO.visible = true;
 	}, this);
-	ship.body.collides(asternoidCollisionGroup,null, this);
+	ship.body.collides(asternoidCollisionGroup,playProtect, this);
 	ship.body.collides(ufoCollisionGroup,null, this);
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
@@ -219,7 +225,6 @@ function create() {
 }	
 
 function update() {
-	ship.animations.stop();
 	//game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
@@ -354,7 +359,7 @@ function update() {
 		}
 	});
 
-if (cursors.up.isDown && shipAniFlag == false)
+	if (cursors.up.isDown && shipAniFlag == false)
     {
     	
 		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
@@ -362,40 +367,8 @@ if (cursors.up.isDown && shipAniFlag == false)
 			ship.body.velocity.y += 10*Math.sin(ship.body.rotation);
 		}
 		shipInOrbit = false;
-		
-		//shipAnglerVelocity += shipAnglerAcce;
-		
-		
+		playThrust();
     }
-	
-/*
-	if (cursors.up.isDown && shipAnglerVelocity <= 0.05)
-    {
-    	/*
-		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
-			ship.body.velocity.x += 5*Math.cos(ship.body.rotation);
-			ship.body.velocity.y += 5*Math.sin(ship.body.rotation);
-		}
-		
-		shipAnglerVelocity += shipAnglerAcce;
-		
-		
-    }
-    
-
-    else if (cursors.down.isDown && shipAnglerVelocity >= -0.05){
-    	shipAnglerVelocity -= shipAnglerAcce;
-    }
-*/
-
-	
-	
-	
-/*
-	if(shipAngle > 2 * Math.PI){
-		shipAngle = shipAngle -  2 * Math.PI;
-	}
-*/
     if (cursors.left.isDown && shipAniFlag == false)
     {
 		if(shipInOrbit == false){
@@ -404,7 +377,7 @@ if (cursors.up.isDown && shipAniFlag == false)
 		else if(shipAnglerVelocity >= -3){
 			shipAnglerVelocity -= shipAnglerAcce;
 		}
-		
+		playLeft();
     }
     else if (cursors.right.isDown && shipAniFlag == false)
     {
@@ -413,7 +386,8 @@ if (cursors.up.isDown && shipAniFlag == false)
 		}
 		else if(shipAnglerVelocity <= 3){
 			shipAnglerVelocity += shipAnglerAcce;
-		}	
+		}
+		playRight();
     }
 
 	if(ship.body.x > 1024){
@@ -454,6 +428,7 @@ if (cursors.up.isDown && shipAniFlag == false)
 	});
 	
 	guard = true;
+	game.debug.text('ship frame' + ship.frame, 300,300);
 }
 function render(){
 	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 10, 10);
@@ -565,8 +540,27 @@ function checkForRespaw(){
 		if(random == 4){deadAsterois.body.y = game.world.height;}
 		Asteroid_countNum ++;
 	}
+}
+function playProtect(){
+	playProtectAnimation = true;
+	ship.animations.play('protect',20,false);
+	game.time.events.add(Phaser.Timer.SECOND/2, function(){ship.animations.stop('protect',true); playProtectAnimation = false;}, this);
+}
+function playLeft(){
+	if(playProtectAnimation == false){
+		ship.animations.play('moveLeft',20,false);
 	}
-
+}
+function playRight(){
+	if(playProtectAnimation == false){
+		ship.animations.play('moveRight',20,false);
+	}
+}
+function playThrust(){
+	if(playProtectAnimation == false){
+		ship.animations.play('moveForward',20,false);
+	}
+}
 </script>
 </body>
 </html>
