@@ -16,15 +16,15 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
 	//load art assets
-    game.load.image('background', 'assets/background.png');
+    game.load.image('background', 'assets/background.jpg');
 	game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
-	game.load.image('Asteroid','assets/OG_Asteroid_large.png');
-	game.load.image('Asteroid_medium','assets/OG_Asteroid_large.png');
-	game.load.image('Asteroid_small','assets/OG_Asteroid_large.png');
+	game.load.image('Asteroid','assets/Asteroid_large.png');
+	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
+	game.load.image('Asteroid_small','assets/Asteroid_large.png');
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
@@ -316,29 +316,29 @@ function update() {
 	
 	Asteroids.forEach( function (singleAsteroid){
 		//singleAsteroid.body.thrust(100);
-		if(singleAsteroid.body.x > 800){
+		if(singleAsteroid.body.x > 1024){
 			singleAsteroid.body.x = 0;
 		}else if(singleAsteroid.body.x < 0){
-			singleAsteroid.body.x = 800;
+			singleAsteroid.body.x = 1024;
 		}
-		if(singleAsteroid.body.y > 600){
+		if(singleAsteroid.body.y > 800){
 			singleAsteroid.body.y = 0;
 		}else if(singleAsteroid.body.y < 0){
-			singleAsteroid.body.y = 600;
+			singleAsteroid.body.y = 800;
 		}
 	});
 	
 		UFOs.forEach( function (ufo){
 		ufo.body.thrust(100);
-		if(ufo.body.x > 800){
+		if(ufo.body.x > 1024){
 			ufo.body.x = 0;
 		}else if(ufo.body.x < 0){
-			ufo.body.x = 800;
+			ufo.body.x = 1024;
 		}
-		if(ufo.body.y > 600){
+		if(ufo.body.y > 800){
 			ufo.body.y = 0;
 		}else if(ufo.body.y < 0){
-			ufo.body.y = 600;
+			ufo.body.y = 800;
 		}
 	});
 
@@ -404,15 +404,15 @@ if (cursors.up.isDown && shipAniFlag == false)
 		}	
     }
 
-	if(ship.body.x > 800){
+	if(ship.body.x > 1024){
 		ship.body.x = 0;
 	}else if(ship.body.x < 0){
-		ship.body.x = 800;
+		ship.body.x = 1024;
 	}
-	if(ship.body.y > 600){
+	if(ship.body.y > 800){
 		ship.body.y = 0;
 	}else if(ship.body.y < 0){
-		ship.body.y = 600;
+		ship.body.y = 800;
 	}
 	if (fireButton.isDown){
 
@@ -436,7 +436,7 @@ if (cursors.up.isDown && shipAniFlag == false)
     }
     
     bulletGroup.forEach(function (singleBullet){
-		if(singleBullet.body.x >= 800 || singleBullet.body.x <= 0 || singleBullet.body.y >= 600 || singleBullet.body.y <= 0){
+		if(singleBullet.body.x >= 1024 || singleBullet.body.x <= 0 || singleBullet.body.y >= 800 || singleBullet.body.y <= 0){
 			singleBullet.kill();
 		}
 	});
