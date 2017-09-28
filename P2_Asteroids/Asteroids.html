@@ -494,6 +494,7 @@ function destoryNupdate(body1,body2){	// call this function to add score
 	body1.sprite.kill();
 	Asteroid_countNum = Asteroid_countNum -1;
 	checkForRespaw();
+	game.camera.shake(0.03, 100);
 	}
 function destory(body1,body2){
 	//score = score + 100;
