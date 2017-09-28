@@ -29,7 +29,7 @@ function preload() {
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
-	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet.png',256,256,90);
+	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_0.125x.png',32,32,90);
 	
 }
 var ship;
@@ -70,8 +70,12 @@ function create() {
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	
-	//game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
-    //game.physics.p2.restitution = 0.0;
+	//create spritesheet
+	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
+	TorpedoSprite.animations.add('glow');
+	TorpedoSprite.animations.play('glow', 50, true);
+	game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
+    game.physics.p2.restitution = 0.0;*/
 
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -86,7 +90,7 @@ function create() {
 		fill: "#ffffff", 
 		align: "center" });
     scoreText.anchor.setTo(0.5, 0.5);
-	
+
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
 	ship.scale.set(0.1);
@@ -161,14 +165,13 @@ function create() {
 	bulletGroup.enableBody = true;
 	bulletGroup.physicsBodyType = Phaser.Physics.P2JS;
 	
-	bulletGroup.createMultiple(5, 'baddie',[0,1,2,3]);
-	//bulletGroup.createMultiple(5, 'Torpedo',[0,1,2,3]);
+	//bulletGroup.createMultiple(5, 'baddie',[0,1,2,3]);
+	bulletGroup.createMultiple(1, 'Torpedo',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,19,20,21,22,23,24,25,26,27,28,29]);
     bulletGroup.setAll('anchor.x', 0.5);
     bulletGroup.setAll('anchor.y', 0.5);
 
     bulletGroup.forEach(function(singleBullet){
 		//TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'Torpedo');
-		//TorpedoSprite.scale.set(0.1);
 		//singleBullet.body.sprite.key = 'Torpedo';
 		//TorpedoSprite.animations.add('glow');
 		//TorpedoSprite.animations.play('glow', 50, true);
@@ -176,8 +179,10 @@ function create() {
 		//singleBullet.body.setRectangle(40,40);
 		//Baddie = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'baddie');
 		//singleBullet.body.sprite.key = 'baddie';
+		//singleBullet.body.sprite = TorpedoSprite;
 		
 		singleBullet.body.setCollisionGroup(bulletCollisionGroup);
+		//singleBullet.body.sprite.scale.set(0.1);
 		singleBullet.body.collides(asternoidCollisionGroup, bulletHite, this);
 		singleBullet.body.collides(planetCollisionGroup, planetHite, this);
 		singleBullet.body.collides(ufoCollisionGroup,destory, this);
