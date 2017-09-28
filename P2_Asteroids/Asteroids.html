@@ -56,7 +56,8 @@ var planetCollisionGroup;
 var asternoidCollisionGroup_2;
 
 var bulletInterval = 0;
-var collisionGuard = [0, 0];
+//var collisionGuard = [0, 0];
+var guard = true;
 
 var fireButton;
 var cursors;
@@ -175,9 +176,9 @@ function create() {
 	game.time.events.add(Phaser.Timer.SECOND*2, function(){
 		singleUFO.visible = true;
 	}, this);
-	//ship.body.collides(asternoidCollisionGroup,destoryNupdate, this);
+	ship.body.collides(asternoidCollisionGroup,destoryNupdate, this);
 	ship.body.collides(ufoCollisionGroup,null, this);
-	//ship.body.collides(planetCollisionGroup,null,this);
+	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }	
@@ -415,6 +416,8 @@ if (cursors.up.isDown && shipAniFlag == false)
 			singleBullet.kill();
 		}
 	});
+	
+	guard = true;
 }
 function render(){
 	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 10, 10);
@@ -426,10 +429,9 @@ function planetHite(body1,body2){
 }
 	
 function bulletHite(body1,body2){
-	if(body1.sprite.body.id != collisionGuard[0] || body2.sprite.body.id != collisionGuard[1]){
-		collisionGuard[0] = body1.sprite.body.id;
-		collisionGuard[1] = body2.sprite.body.id;
-
+	if(guard == true){
+		guard = false;
+		
 		var size = body2.sprite.scale.x;
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
@@ -453,6 +455,7 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.setRectangle(40,40);
 				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.x += (-0.5 + i)*50;
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
@@ -460,9 +463,15 @@ function bulletHite(body1,body2){
 			}
 			
 		}
+	}
+	
+	/*
+	if(body1.sprite.body.id != collisionGuard[0] || body2.sprite.body.id != collisionGuard[1]){
+		collisionGuard[0] = body1.sprite.body.id;
+		collisionGuard[1] = body2.sprite.body.id;
 		
 	}
-
+*/
 }
 function destoryNupdate(body1,body2){	// call this function to add score 
 	score = score - 10;
