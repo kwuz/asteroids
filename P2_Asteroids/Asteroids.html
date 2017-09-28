@@ -199,7 +199,7 @@ function update() {
 	//game.kill();
 	}
 		
-	game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
+	//game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
@@ -512,7 +512,7 @@ function accelerateToObject(obj1, obj2, speed) {
 	//game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
 	if(distance < 18000.0 ){
 		if (typeof speed === 'undefined') { speed = 60; }
-		game.debug.text('such in', 350, 200);
+		//game.debug.text('such in', 350, 200);
 		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
 		//obj1.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
 		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
