@@ -33,7 +33,11 @@ var ship;
 var shipRadius = 100;
 var shipAngle = 0;
 var shipAnglerVelocity = 0;
-var shipAnglerAcce = 0.001;
+var shipAnglerAcce = 1;
+var shipAniFlag = false;
+var shipInOrbit = false;
+
+var targetAngle = 0;
 
 var UFOs;
 var planets;
@@ -84,7 +88,7 @@ function create() {
     scoreText.anchor.setTo(0.5, 0.5);
 	
 	// create ship
-	ship = game.add.sprite(game.world.width/2 + 100,game.world.height/2,'ship');
+	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
 	ship.scale.set(0.1);
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
@@ -179,13 +183,110 @@ function create() {
 }	
 
 function update() {
-	ship.body.setZeroVelocity();
-	ship.body.angularVelocity = 0;
+	//game.debug.spriteInfo(ship, 32, 32);
+	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
+	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
+	
+	planets.forEach(moveToPlanet,this);
+	if(shipAniFlag == false){
+		ship.body.angularVelocity = 0;
+	}
+	
 		
 	//ship.body.x = ship.body.x + shipVelX;
 	//ship.body.y = ship.body.y + shipVelY;
 	ship.body.velocity.x = ship.body.velocity.x * 0.99;
 	ship.body.velocity.y = ship.body.velocity.y * 0.99;
+
+	if((ship.body.x - game.world.centerX) * (ship.body.x - game.world.centerX) + (ship.body.y - game.world.centerY)*(ship.body.y - game.world.centerY) <= 10000 && shipInOrbit == false) {
+		
+		if(ship.body.x == game.world.centerX && ship.body.y - game.world.centerY > 0){
+			targetAngle = 270;
+		}
+		else if(ship.body.x == game.world.centerX && ship.body.y - game.world.centerY < 0){
+			targetAngle = 90;
+		}
+		else if(ship.body.x - game.world.centerX < 0 && ship.body.y - game.world.centerY >= 0)
+		{
+			targetAngle = Math.atan((ship.body.y - game.world.centerY)/(ship.body.x - game.world.centerX));
+			targetAngle = Phaser.Math.radToDeg(targetAngle) + 180;
+		}
+		else if(ship.body.x - game.world.centerX < 0 && ship.body.y - game.world.centerY < 0)
+		{
+			targetAngle = Math.atan((ship.body.y - game.world.centerY)/(ship.body.x - game.world.centerX));
+			targetAngle = Phaser.Math.radToDeg(targetAngle) + 180;
+		}
+		else 
+		{
+			targetAngle = Math.atan((ship.body.y - game.world.centerY)/(ship.body.x - game.world.centerX));
+			targetAngle = Phaser.Math.radToDeg(targetAngle);
+			if(targetAngle < 0){
+				targetAngle = 360 + targetAngle;
+			}
+		}
+		
+		shipInOrbit = true;
+		shipAngle = targetAngle;
+
+		var tagentAngle = targetAngle + 90;
+		if(targetAngle >= 360){
+			tagentAngle = tagentAngle -360;
+		}
+		var rad = Phaser.Math.degToRad(tagentAngle);
+		var vectorX = Math.cos(rad);
+		var vectorY = Math.sin(rad);
+		var baseVelocity = ship.body.velocity.x * vectorX + ship.body.velocity.y * vectorY;
+		shipAnglerVelocity = baseVelocity * 0.01;
+		ship.body.setZeroVelocity();
+
+
+		var tempAngle;
+		if(ship.body.angle < 0){
+			tempAngle = ship.body.angle + 360;
+		}
+		else{
+			tempAngle = ship.body.angle;
+		}
+		var angleDiff = targetAngle - tempAngle;
+		if(angleDiff >= 0 && angleDiff <= 180 || angleDiff < -180 ) {
+			ship.body.rotateRight(100);
+
+		}
+		else if(angleDiff < 0 && angleDiff >= -180 || angleDiff > 180){
+			ship.body.rotateLeft(100);
+		}
+		shipAniFlag = true;
+	}
+
+	
+	if(shipAniFlag == true){
+		var tempAngle;
+		if(ship.body.angle < 0){
+			tempAngle = ship.body.angle + 360;
+		}
+		else{
+			tempAngle = ship.body.angle;
+		}
+		if(Math.abs(tempAngle - shipAngle) <= 3){
+			shipAniFlag =false;
+		}
+	}
+
+	if(shipInOrbit == true){
+		shipAngle += shipAnglerVelocity;
+		if(shipAngle >= 360){
+			shipAngle = shipAngle -360;
+		}
+		else if(shipAngle < 0){
+			shipAngle = shipAngle + 360;
+		}
+    	ship.body.rotation +=  Phaser.Math.degToRad(shipAnglerVelocity);
+    	var rad = Phaser.Math.degToRad(shipAngle);
+		ship.body.x = game.world.width/2 + shipRadius * Math.cos(rad);
+		ship.body.y = game.world.height/2 + shipRadius * Math.sin(rad);
+		shipAnglerVelocity = shipAnglerVelocity * 0.99;
+	}
+
 	
 	Asteroids.forEach( function (singleAsteroid){
 		//singleAsteroid.body.thrust(100);
@@ -215,6 +316,21 @@ function update() {
 		}
 	});
 
+if (cursors.up.isDown && shipAniFlag == false)
+    {
+    	
+		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
+			ship.body.velocity.x += 10*Math.cos(ship.body.rotation);
+			ship.body.velocity.y += 10*Math.sin(ship.body.rotation);
+		}
+		shipInOrbit = false;
+		
+		//shipAnglerVelocity += shipAnglerAcce;
+		
+		
+    }
+	
+/*
 	if (cursors.up.isDown && shipAnglerVelocity <= 0.05)
     {
     	/*
@@ -222,34 +338,45 @@ function update() {
 			ship.body.velocity.x += 5*Math.cos(ship.body.rotation);
 			ship.body.velocity.y += 5*Math.sin(ship.body.rotation);
 		}
-		*/
+		
 		shipAnglerVelocity += shipAnglerAcce;
 		
 		
     }
+    
+
     else if (cursors.down.isDown && shipAnglerVelocity >= -0.05){
     	shipAnglerVelocity -= shipAnglerAcce;
     }
+*/
 
-	shipAngle += shipAnglerVelocity;
-    ship.body.rotation += shipAnglerVelocity;
-	ship.body.x = game.world.width/2 + shipRadius * Math.cos(shipAngle);
-	ship.body.y = game.world.height/2 + shipRadius * Math.sin(shipAngle);
 	
 	
 	
+/*
 	if(shipAngle > 2 * Math.PI){
 		shipAngle = shipAngle -  2 * Math.PI;
 	}
-
-    if (cursors.left.isDown)
+*/
+    if (cursors.left.isDown && shipAniFlag == false)
     {
-		//updateScore(100);
-		ship.body.rotateLeft(100);
+		if(shipInOrbit == false){
+			ship.body.rotateLeft(100);
+		}
+		else if(shipAnglerVelocity >= -5){
+			shipAnglerVelocity -= shipAnglerAcce;
+		}
+		
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown && shipAniFlag == false)
     {
-		ship.body.rotateRight(100);
+		if(shipInOrbit == false){
+			ship.body.rotateRight(100);
+		}
+		else if(shipAnglerVelocity <= 5){
+			shipAnglerVelocity += shipAnglerAcce;
+		
+		}	
     }
 
 	if(ship.body.x > 800){
@@ -290,9 +417,9 @@ function update() {
 	});
 }
 function render(){
-	game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 10, 10);
 	game.debug.spriteInfo(ship, 32, 32);
-	}
+}
 
 function planetHite(body1,body2){
 	body1.sprite.kill();
@@ -346,6 +473,26 @@ function destory(body1,body2){
 	//score = score + 100;
 	body2.sprite.kill();
 	}
+function moveToPlanet (planet) { 
+
+		accelerateToObject(ship,planet,200);
+
+	}
+function accelerateToObject(obj1, obj2, speed) {
+	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
+	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 32, 200);
+	//game.debug.spriteInfo(ship, 32, 32);
+	//game.debug.text('distance' +((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y)), 32 ,300);
+	if(distance < 90000.0 ){
+		if (typeof speed === 'undefined') { speed = 60; }
+		game.debug.text('such in', 350, 200);
+		var angle = Math.atan2(obj2.y - obj1.y, obj2.x - obj1.x);
+		//obj1.body.rotation = angle + game.math.degToRad(90);  // correct angle of angry bullets (depends on the sprite used)
+		obj1.body.force.x = Math.cos(angle) * speed;    // accelerateToObject 
+		obj1.body.force.y = Math.sin(angle) * speed;
+	}	
+}
+
 </script>
 </body>
 </html>
