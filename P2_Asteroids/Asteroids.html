@@ -58,7 +58,8 @@ var ufoCollisionGroup;
 var planetCollisionGroup;
 
 var bulletInterval = 0;
-var collisionGuard = [0, 0];
+//var collisionGuard = [0, 0];
+var guard = true;
 
 var fireButton;
 var cursors;
@@ -421,6 +422,8 @@ if (cursors.up.isDown && shipAniFlag == false)
 			singleBullet.kill();
 		}
 	});
+	
+	guard = true;
 }
 function render(){
 	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 10, 10);
@@ -432,11 +435,10 @@ function planetHite(body1,body2){
 }
 	
 function bulletHite(body1,body2){
-	if(body1.sprite.body.id != collisionGuard[0] || body2.sprite.body.id != collisionGuard[1]){
-		collisionGuard[0] = body1.sprite.body.id;
-		collisionGuard[1] = body2.sprite.body.id;
-
-		//var size = body2.sprite.scale.x;
+	if(guard == true){
+		guard = false;
+		
+		var size = body2.sprite.scale.x;
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
 		
@@ -445,8 +447,9 @@ function bulletHite(body1,body2){
 		Asteroid_countNum = Asteroid_countNum - 1;
 		checkForRespaw();
 		if(body2.sprite.key == 'Asteroid'){
-			var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
+			
 			for(var i = 0; i < 2; i++){
+				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.1, 0.1);
 				singleAsteroid.body.setRectangle(40,40);
@@ -460,8 +463,9 @@ function bulletHite(body1,body2){
 		}
 		
 		if(body2.sprite.key == 'Asteroid_medium'){
-			var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
+			
 			for(var i = 0; i < 2; i++){
+				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.05, 0.05);
 				singleAsteroid.body.setRectangle(40,40);
@@ -491,17 +495,27 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.setRectangle(40,40);
 				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-30, 30);
 				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-30, 30);
+				singleAsteroid.body.x += (-0.5 + i)*50;
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 			}
 			
+<<<<<<< HEAD
 		}*/
+
+		}
+	}
+	
+	/*
+	if(body1.sprite.body.id != collisionGuard[0] || body2.sprite.body.id != collisionGuard[1]){
+		collisionGuard[0] = body1.sprite.body.id;
+		collisionGuard[1] = body2.sprite.body.id;
+>>>>>>> Dev_Yitong
 		
 	}
-
-}
+*/
 function destoryNupdate(body1,body2){	// call this function to add score 
 	score = score - 10;
 	scoreText.setText("Planet' life is " + score);
@@ -538,6 +552,7 @@ function checkForRespaw(){
 		deadAsterois.body.sprite.alive = true;
 		deadAsterois.body.sprite.exists = true;
 		deadAsterois.body.sprite.visible = true;
+		Asteroid_countNum ++;
 	}
 	}
 
