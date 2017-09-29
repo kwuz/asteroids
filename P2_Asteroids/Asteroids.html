@@ -144,7 +144,7 @@ function create() {
 	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
-		singleAsteroid.body.setRectangle(40,40);
+		singleAsteroid.body.setRectangle(50,50);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 		singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
@@ -176,8 +176,8 @@ function create() {
     planets.physicsBodyType = Phaser.Physics.P2JS;
 	
 	var singlePLanet = planets.create(game.world.width/2,game.world.height/2,'planet');
-	singlePLanet.scale.setTo(0.2,0.2);
-	singlePLanet.body.setCircle(40);
+	singlePLanet.scale.setTo(0.17,0.17);
+	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
 	singlePLanet.body.mass = 2000.0
