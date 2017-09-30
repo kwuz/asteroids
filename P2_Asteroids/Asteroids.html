@@ -29,7 +29,7 @@ function preload() {
 	game.load.image('ufo','assets/OG_UFO.png');
 	game.load.image('planet','assets/planet.png');
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
-	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_0.125x.png',32,32,90);
+	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_8px.png',8,8,90);
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
 	
 	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
@@ -51,10 +51,12 @@ var UFOs;
 var planets;
 var Asteroids;
 var bulletGroup;
+var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var score = 100;
+var health = 100;
+var score = 0;
 var Asteroid_countNum = 4;
 
 var shipCollisionGroup;
@@ -102,17 +104,23 @@ function create() {
 	planetCollisionGroup = game.physics.p2.createCollisionGroup();
 	//game.physics.p2.updateBoundsCollisionGroup();
 	//create text
-	scoreText = game.add.text(game.world.centerX+100, game.world.centerY-250, "Planet' life is " + score, { 
+	healthText = game.add.text(game.world.centerX+100, game.world.centerY-250, "Planet' life is " + health, { 
 		font: "30px Arial", 
 		fill: "#ffffff", 
 		align: "center" });
-    scoreText.anchor.setTo(0.5, 0.5);
+    healthText.anchor.setTo(0.5, 0.5);
+	
+	scoreText = game.add.text(game.world.centerX+100, game.world.centerY-200, "score is " + score, { 
+		font: "30px Arial", 
+		fill: "#ffffff", 
+		align: "center" });
+	scoreText.anchor.setTo(0.5, 0.5);
 
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
 	ship.animations.add('protect',[6,13,20,27,34,41],true);
-	ship.animations.add('moveLeft',[2,9,16],true);
-	ship.animations.add('moveRight',[4,11,18],true);
+	ship.animations.add('moveRight',[2,9,16],true);
+	ship.animations.add('moveLeft',[4,11,18],true);
 	ship.animations.add('moveForward',[1,8,15,22,29,36],true);
 	ship.animations.stop();
 	ship.frame = 1;
@@ -442,7 +450,7 @@ function planetHite(body1,body2){
 function bulletHite(body1,body2){
 	if(guard == true){
 		guard = false;
-		
+		var AstType = 1;
 		var size = body2.sprite.scale.x;
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
@@ -454,6 +462,7 @@ function bulletHite(body1,body2){
 			
 		for(var i = 0; i < 2; i++){
 			if(body2.sprite.key == 'Asteroid'){
+				AstType = 0;
 				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.1, 0.1);
@@ -466,6 +475,7 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 			}else if(body2.sprite.key == 'Asteroid_medium'){
+				AstType = 1;
 				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_small');
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.05, 0.05);
@@ -477,33 +487,38 @@ function bulletHite(body1,body2){
 				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+			}else {
+				AstType = 2;
 			}
-
-			}
+		}
+		if(AstType == 0){score = score +20;}
+		else if(AstType ==1) {score = score +50;}
+		else {score = score +100;}
+		scoreText.setText('score is  '+score);
 		body2.sprite.kill();
 	}
 }
 
-function destoryNupdate(body1,body2){	// call this function to add score 
-	score = score - 10;
-	scoreText.setText("Planet' life is " + score);
+function destoryNupdate(body1,body2){	// call this function to damage
+	health = health - 10;
+	healthText.setText("Planet' life is " + health);
 	body1.sprite.kill();
 	Asteroid_countNum = Asteroid_countNum -1;
 	checkForRespaw();
 	planetHit.play();
 	game.camera.shake(0.03, 100);
 	
-	if (score <= 0){
-	scoreText.setText('GameOver!');
-	scoreText.x = game.world.width/2;
-	scoreText.y = game.world.height/2-200;
-	scoreText.fontSize = 100;
+	if (health <= 0){
+	healthText.setText('GameOver!');
+	healthText.x = game.world.width/2;
+	healthText.y = game.world.height/2-200;
+	healthText.fontSize = 100;
 	planetDestory.play();
 	//game.kill();
 		}
 	}
 function destory(body1,body2){
-	//score = score + 100;
+	//health= health + 100;
 	body2.sprite.kill();
 	}
 function moveToPlanet (planet) { 
