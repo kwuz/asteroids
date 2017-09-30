@@ -41,9 +41,9 @@ function preload() {
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
 	game.load.audio('planetHit','assets/asteroids_planethit.wav');
 	game.load.audio('planetDestory','assets/asteroids_planetdestroy1.wav');
-	game.load.audio('backGroundMusic','assets/BackgroundMusic.mp3');
-	game.load.audio('backGroundMusic_2','assets/BackgroundMusic_2.mp3');
-	game.load.audio('backGroundMusic_3','assets/BackgroundMusic_3.mp3');
+	game.load.audio('backGroundMusic','assets/background_a.mp3');
+	game.load.audio('backGroundMusic_2','assets/background_b.mp3');
+	game.load.audio('backGroundMusic_3','assets/background_c.mp3');
 }
 var ship;
 var shipRadius = 100;
@@ -104,15 +104,15 @@ function create() {
 	planetDestory = game.add.audio('planetDestory');
 	BackgroundMusic = game.add.audio('backGroundMusic');
 	BackgroundMusic.loop = true;
-	BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
-	BackgroundMusic_2.loop = true;
-	BackgroundMusic_3 = game.add.audio('backGroundMusic_3');
-	BackgroundMusic_3.loop = true;
+	//BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
+	//BackgroundMusic_2.loop = true;
+	//BackgroundMusic_3 = game.add.audio('backGroundMusic_3');
+	//BackgroundMusic_3.loop = true;
 	BackgroundMusic.play();
-	BackgroundMusic_2.play();
-	BackgroundMusic_3.play();
-	BackgroundMusic_2.pause();
-	BackgroundMusic_3.pause();
+	//BackgroundMusic_2.play();
+	//BackgroundMusic_3.play();
+	//BackgroundMusic_2.pause();
+	//BackgroundMusic_3.pause();
 	//
 	//create spritesheet
 	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
@@ -159,9 +159,9 @@ function create() {
 	Asteroids = game.add.group(); //commented for testing
 	Asteroids.enableBody = true;
     Asteroids.physicsBodyType = Phaser.Physics.P2JS;
-	var singleAsteroid = Asteroids.create(10,10,'Asteroid');
-	singleAsteroid.body.velocity.x = 300;
-	singleAsteroid.body.velocity.y = 300;
+	var singleAsteroid = Asteroids.create(1,1,'Asteroid');
+	singleAsteroid.body.velocity.x = 150;
+	singleAsteroid.body.velocity.y = 160;
 	
 	singleAsteroid = Asteroids.create(600,25,'Asteroid');
 	singleAsteroid.body.velocity.x = -30;
@@ -172,8 +172,8 @@ function create() {
 	singleAsteroid.body.velocity.y = -30;
 	
 	singleAsteroid = Asteroids.create(1014,790,'Asteroid');
-	singleAsteroid.body.velocity.x = -300;
-	singleAsteroid.body.velocity.y = -300;
+	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.y = -150;
 	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
@@ -183,7 +183,17 @@ function create() {
 		singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
+		singleAsteroid.kill();
 	});
+	
+	game.time.events.add(Phaser.Timer.SECOND*5, function(){
+		Asteroids.forEach(function(singleAsteroid){
+		singleAsteroid.visible = true;
+		singleAsteroid.exists = true;
+		singleAsteroid.alive = true;
+	});
+	}, this);
+	
 	//create asteroid medium
 	
 	
@@ -254,7 +264,6 @@ function create() {
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	
 	game.sound.setDecodedCallback([blaster,asterDestory,planetHit,planetDestory,BackgroundMusic,BackgroundMusic_2,BackgroundMusic_3], start, this);
 	//timers
 	/*
@@ -470,7 +479,6 @@ function update() {
 		ship.body.y = 800;
 	}
 	if (fireButton.isDown){
-		
 		if (game.time.now > bulletInterval) {
 			var bullet = bulletGroup.getFirstExists(false);
     		if (bullet) {
@@ -498,7 +506,7 @@ function update() {
 	
 	guard = true;
 	game.debug.text('Orbation' + shipInOrbit, 300,300);
-	
+
 	//zoom in controls
 }
 function render(){
@@ -590,10 +598,16 @@ function destoryNupdate(body1,body2){	// call this function to damage
 	}
 //health change
 	if(health <= 80 && health > 60){
+			//BackgroundMusic.pause();
+			//BackgroundMusic_2.play();
+			//BackgroundMusic_3.pause();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_80',0);
 		});}
 		else if(health <= 60 && health > 40){
+			//BackgroundMusic.pause();
+			//BackgroundMusic_2.pause();
+			//BackgroundMusic_3.play();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_60',0);
 		});}
@@ -653,11 +667,16 @@ function checkForRespaw(){
 		deadAsterois.body.sprite.alive = true;
 		deadAsterois.body.sprite.exists = true;
 		deadAsterois.body.sprite.visible = true;
-		var random = game.rnd.between(1,4);
-		if(random == 1){deadAsterois.body.x = 0;}
-		if(random == 2){deadAsterois.body.y =0;}
-		if(random == 3){deadAsterois.body.x = game.world.width;}
-		if(random == 4){deadAsterois.body.y = game.world.height;}
+		if(!shipInOrbit){
+			var random = game.rnd.between(1,4);
+			if(random == 1){deadAsterois.body.x = 0;}
+			if(random == 2){deadAsterois.body.y =0;}
+			if(random == 3){deadAsterois.body.x = game.world.width;}
+			if(random == 4){deadAsterois.body.y = game.world.height;}
+		}else{
+			deadAsterois.body.x = Math.cos(game.rnd.realInRange(-1,1))*400;
+			deadAsterois.body.y = Math.sin(game.rnd.realInRange(-1,1))*400;
+		}
 		Asteroid_countNum ++;
 	}
 }
