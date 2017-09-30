@@ -41,6 +41,9 @@ function preload() {
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
 	game.load.audio('planetHit','assets/asteroids_planethit.wav');
 	game.load.audio('planetDestory','assets/asteroids_planetdestroy1.wav');
+	game.load.audio('backGroundMusic','assets/BackgroundMusic.mp3');
+	game.load.audio('backGroundMusic_2','assets/BackgroundMusic_2.mp3');
+	game.load.audio('backGroundMusic_3','assets/BackgroundMusic_3.mp3');
 }
 var ship;
 var shipRadius = 100;
@@ -85,6 +88,9 @@ var blaster;
 var asterDestory;
 var planetHit;
 var planetDestory;
+var BackgroundMusic;
+var BackgroundMusic_2;
+var BackgroundMusic_3;
 function create() {
 	//basic initiation
 	game.add.image(0,0,'background');//add background
@@ -96,6 +102,17 @@ function create() {
 	asterDestory = game.add.audio('asternoidDestory');
 	planetHit = game.add.audio('planetHit');
 	planetDestory = game.add.audio('planetDestory');
+	BackgroundMusic = game.add.audio('backGroundMusic');
+	BackgroundMusic.loop = true;
+	BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
+	BackgroundMusic_2.loop = true;
+	BackgroundMusic_3 = game.add.audio('backGroundMusic_3');
+	BackgroundMusic_3.loop = true;
+	BackgroundMusic.play();
+	BackgroundMusic_2.play();
+	BackgroundMusic_3.play();
+	BackgroundMusic_2.pause();
+	BackgroundMusic_3.pause();
 	//
 	//create spritesheet
 	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
@@ -238,7 +255,7 @@ function create() {
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
-	game.sound.setDecodedCallback([blaster], start, this);
+	game.sound.setDecodedCallback([blaster,asterDestory,planetHit,planetDestory,BackgroundMusic,BackgroundMusic_2,BackgroundMusic_3], start, this);
 	//timers
 	/*
 	zoomInTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
@@ -554,13 +571,22 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		health = health - 10;
 		healthText.setText("Planet' life is " + health);
 	}else{
-		health = health - 5;		planetDestory.play();
+		health = health - 5;
+		healthText.setText("Planet' life is " + health);
+	}
+	if(health <= 0 ){
 		health = 0;
 		healthText.setText('GameOver!');
 		healthText.x = game.world.width/2;
 		healthText.y = game.world.height/2-200;
 		healthText.fontSize = 100;
-		healthText.setText("Planet' life is " + health);
+		
+		//scoreText.setText('GameOver!');
+		scoreText.setText("Your score is " + score);
+		scoreText.x = game.world.width/2;
+		scoreText.y = game.world.height/2-300;
+		scoreText.fontSize = 100;
+
 	}
 //health change
 	if(health <= 80 && health > 60){
