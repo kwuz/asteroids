@@ -420,7 +420,7 @@ function update() {
 		}
 	});
 	
-		UFOs.forEach( function (ufo){
+	UFOs.forEach( function (ufo){
 		ufo.body.thrust(100);
 		if(ufo.body.x > 1024){
 			ufo.body.x = 0;
@@ -571,6 +571,10 @@ function bulletHite(body1,body2){
 }
 
 function destoryNupdate(body1,body2){	// call this function to damage
+	if(shipInOrbit){
+		ship.body.thrust(10000);
+		shipInOrbit = false;
+	}
 //damage change
 	if(body1.sprite.key == 'Asteroid'){
 		health = health - 15;
@@ -629,7 +633,7 @@ function destoryNupdate(body1,body2){	// call this function to damage
 			healthText.y = game.world.height/2-200;
 			healthText.fontSize = 100;
 		});}
-
+		
 	body1.sprite.kill();
 	Asteroid_countNum = Asteroid_countNum -1;
 	checkForRespaw();
