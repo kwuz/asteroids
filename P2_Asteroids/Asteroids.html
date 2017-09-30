@@ -27,7 +27,12 @@ function preload() {
 	game.load.image('Asteroid_small','assets/Asteroid_large.png');
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/OG_UFO.png');
-	game.load.image('planet','assets/planet.png');
+	game.load.image('planet','assets/planet_100.png');
+	game.load.image('planet_80','assets/planet_80.png');
+	game.load.image('planet_60','assets/planet_60.png');
+	game.load.image('planet_40','assets/planet_40.png');
+	game.load.image('planet_20','assets/planet_20.png');
+	game.load.image('planet_0','assets/planet_0.png');
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
 	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_8px.png',8,8,90);
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
@@ -58,6 +63,9 @@ var shipVelY;
 var health = 100;
 var score = 0;
 var Asteroid_countNum = 4;
+var zoomFactor = 1.0;
+var zoomInTimer;
+var zoomOutTimer;
 
 var shipCollisionGroup;
 var asternoidCollisionGroup;
@@ -190,6 +198,7 @@ function create() {
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
 	singlePLanet.body.mass = 2000.0
 	singlePLanet.body.damping = 1.0;
+	game.camera.follow(singlePLanet);
 	
 	//create bullet
 	bulletGroup = game.add.group();//There are multiple bullets they should be created in update rather then here
@@ -230,6 +239,33 @@ function create() {
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	
 	game.sound.setDecodedCallback([blaster], start, this);
+	//timers
+	/*
+	zoomInTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
+		zoomFactor = zoomFactor + 0.1;
+		game.world.scale.setTo(zoomFactor);
+	}, this);
+	zoomInTimer.pause();
+	
+	zoomOutTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
+		zoomFactor = zoomFactor - 0.1;
+		game.world.scale.setTo(zoomFactor);
+	}, this);
+	zoomOutTimer.pause();*/	
+	/*
+	zoomInTimer = game.time.events.repeat(Phaser.Timer.SECOND*0.1, 10, function(){
+			if (zoomFactor <= 1.5){
+			zoomFactor = zoomFactor + 0.05;
+			game.world.scale.setTo(zoomFactor);
+		}
+	}, this);
+	
+	zoomOutTimer = game.time.events.repeat(Phaser.Timer.SECOND*0.1, 10, function(){
+			if (zoomFactor > 1.0){
+			zoomFactor = zoomFactor - 0.05;
+			game.world.scale.setTo(zoomFactor);
+		}
+	}, this);*/
 }	
 
 function update() {
@@ -237,7 +273,7 @@ function update() {
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
-	
+	//game.world.scale.setTo(zoomFactor);
 	planets.forEach(moveToPlanet,this);
 	if(shipAniFlag == false){
 		ship.body.angularVelocity = 0;
@@ -277,6 +313,9 @@ function update() {
 		}
 		
 		shipInOrbit = true;
+		zoomIn();
+		//game.time.events.pause(zoomOutTimer);
+		//game.time.events.resume(zoomInTimer);
 		shipAngle = targetAngle;
 
 		var tagentAngle = targetAngle + 90;
@@ -307,6 +346,8 @@ function update() {
 			ship.body.rotateLeft(100);
 		}
 		shipAniFlag = true;
+		
+		
 	}
 
 	
@@ -375,6 +416,9 @@ function update() {
 			ship.body.velocity.y += 10*Math.sin(ship.body.rotation);
 		}
 		shipInOrbit = false;
+		zoomOut();
+		//game.time.events.pause(zoomInTimer);
+		//game.time.events.resume(zoomOutTimer);
 		playThrust();
     }
     if (cursors.left.isDown && shipAniFlag == false)
@@ -436,7 +480,9 @@ function update() {
 	});
 	
 	guard = true;
-	game.debug.text('ship frame' + ship.frame, 300,300);
+	game.debug.text('Orbation' + shipInOrbit, 300,300);
+	
+	//zoom in controls
 }
 function render(){
 	//game.debug.text('velocity' + shipVelX +'and'+ shipVelY , 10, 10);
@@ -500,23 +546,56 @@ function bulletHite(body1,body2){
 }
 
 function destoryNupdate(body1,body2){	// call this function to damage
-	health = health - 10;
-	healthText.setText("Planet' life is " + health);
+//damage change
+	if(body1.sprite.key == 'Asteroid'){
+		health = health - 15;
+		healthText.setText("Planet' life is " + health);
+	}else if(body1.sprite.key == 'Asteroid_medium'){
+		health = health - 10;
+		healthText.setText("Planet' life is " + health);
+	}else{
+		health = health - 5;		planetDestory.play();
+		health = 0;
+		healthText.setText('GameOver!');
+		healthText.x = game.world.width/2;
+		healthText.y = game.world.height/2-200;
+		healthText.fontSize = 100;
+		healthText.setText("Planet' life is " + health);
+	}
+//health change
+	if(health <= 80 && health > 60){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_80',0);
+		});}
+		else if(health <= 60 && health > 40){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_60',0);
+		});}
+		else if(health <= 40 && health > 20){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_40',0);
+		});}
+		else if(health <= 20&& health > 0){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_20',0);
+		});}
+		else if(health <= 0){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_0',0);
+			planetDestory.play();
+			health = 0;
+			healthText.setText('GameOver!');
+			healthText.x = game.world.width/2;
+			healthText.y = game.world.height/2-200;
+			healthText.fontSize = 100;
+		});}
+
 	body1.sprite.kill();
 	Asteroid_countNum = Asteroid_countNum -1;
 	checkForRespaw();
 	planetHit.play();
 	game.camera.shake(0.03, 100);
-	
-	if (health <= 0){
-	healthText.setText('GameOver!');
-	healthText.x = game.world.width/2;
-	healthText.y = game.world.height/2-200;
-	healthText.fontSize = 100;
-	planetDestory.play();
-	//game.kill();
-		}
-	}
+}
 function destory(body1,body2){
 	//health= health + 100;
 	body2.sprite.kill();
@@ -576,6 +655,23 @@ function playThrust(){
 		ship.animations.play('moveForward',20,false);
 	}
 }
+function zoomIn(){
+	for(var i = 1;i <=4;i++){
+			if (zoomFactor <= 1.2){
+			zoomFactor = zoomFactor + 0.05;
+			game.world.scale.setTo(zoomFactor);
+		}
+	}
+}
+function zoomOut(){
+	for(var i = 1;i <=10;i++){
+			if (zoomFactor > 1.0){
+			zoomFactor = zoomFactor - 0.05;
+			game.world.scale.setTo(zoomFactor);
+		}
+	}
+}
+
 </script>
 </body>
 </html>
