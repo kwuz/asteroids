@@ -95,9 +95,11 @@ var BackgroundMusic_2;
 var BackgroundMusic_3;
 function create() {
 	//basic initiation
-	//game.add.image(0,0,'background');//add background
+	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
+	
+	splash = game.add.sprite(0,0,'splash');
 	
 	//create sound
 	blaster = game.add.audio('blaster');
@@ -136,12 +138,14 @@ function create() {
 		fill: "#ffffff", 
 		align: "center" });
     healthText.anchor.setTo(0.5, 0.5);
+	healthText.visible = false;
 	
 	scoreText = game.add.text(game.world.centerX+100, game.world.centerY-200, "score is " + score, { 
 		font: "30px Arial", 
 		fill: "#ffffff", 
 		align: "center" });
 	scoreText.anchor.setTo(0.5, 0.5);
+	scoreText.visible = false;
 	//create splahs
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
@@ -155,6 +159,7 @@ function create() {
 	game.physics.p2.enable(ship,false);
 	ship.body.setCollisionGroup(shipCollisionGroup);
 	ship.body.mass = 1;
+	ship.kill();
 	shipVelX = 0.0;
 	shipVelY = 0.0;
 	//create asteroid
@@ -227,6 +232,7 @@ function create() {
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
 	singlePLanet.body.mass = 2000.0
 	singlePLanet.body.damping = 1.0;
+	singlePLanet.body.sprite.kill();
 	game.camera.follow(singlePLanet);
 	
 	//create bullet
@@ -257,6 +263,19 @@ function create() {
 		//singleBullet.body.collides(ufoCollisionGroup,destory, this);
 		//singleBullet.body.damping = 0.0;
 	});
+	game.time.events.add(Phaser.Timer.SECOND*2, function(){
+		splash.kill();
+		ship.body.sprite.visible = true;
+		ship.body.sprite.exists = true;
+		ship.body.sprite.alive = true;
+		singlePLanet.body.sprite.visible = true;
+		singlePLanet.body.sprite.exists = true;
+		singlePLanet.body.sprite.alive = true;
+		healthText.visible = true;
+		scoreText.visible = true;
+		//game.add.reset();
+		
+	}, this);
 
 	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
 		if(health < 30){
@@ -388,8 +407,6 @@ function update() {
 			ship.body.rotateLeft(100);
 		}
 		shipAniFlag = true;
-		
-		
 	}
 
 	
@@ -588,7 +605,12 @@ function bulletHite(body1,body2){
 
 function destoryNupdate(body1,body2){	// call this function to damage
 	if(shipInOrbit){
-		ship.body.thrust(10000);
+		var rad = Phaser.Math.degToRad(shipAngle);
+		
+		ship.body.x = ship.body.x + Math.cos(rad)*10;
+		ship.body.y = ship.body.y + Math.sin(rad)*10;
+		ship.body.velocity.x = Math.cos(rad) * 600;
+		ship.body.velocity.y = Math.sin(rad) * 600;
 		shipInOrbit = false;
 	}
 //damage change
