@@ -257,7 +257,7 @@ function create() {
 	});
 
 	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
-		if(health < 100){
+		if(health < 30){
 		if(singleUFO.alive == false){
 			singleUFO.body.x = game.rnd.integerInRange(0,1024);
 			singleUFO.body.y = game.rnd.integerInRange(0,800);
