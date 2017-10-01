@@ -21,6 +21,7 @@ var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, creat
 function preload() {
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
+	game.load.image('splash','assets/splash.png');
 	//game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
 	game.load.image('Asteroid','assets/Asteroid_large.png');
 	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
@@ -52,6 +53,7 @@ var shipAnglerVelocity = 0;
 var shipAnglerAcce = 1;
 var shipAniFlag = false;
 var shipInOrbit = false;
+var splash;
 
 var targetAngle = 0;
 
@@ -93,7 +95,7 @@ var BackgroundMusic_2;
 var BackgroundMusic_3;
 function create() {
 	//basic initiation
-	game.add.image(0,0,'background');//add background
+	//game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	
@@ -140,7 +142,7 @@ function create() {
 		fill: "#ffffff", 
 		align: "center" });
 	scoreText.anchor.setTo(0.5, 0.5);
-
+	//create splahs
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
 	ship.animations.add('protect',[6,13,20,27,34,41],true);
@@ -204,7 +206,6 @@ function create() {
 	
 	var singleUFO = UFOs.create(200,25,'ufo');
 	//singleUFO.scale.setTo(0.1,0.1);
-	singleUFO.visible = false;
 	singleUFO.body.setRectangle(40,40);
 	singleUFO.body.setCollisionGroup(ufoCollisionGroup);
 	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,planetCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,]);
@@ -212,6 +213,7 @@ function create() {
 	singleUFO.body.damping = 0.0;
 	singleUFO.body.velocity.x = 30;
 	singleUFO.body.velocity.y = 30;
+	singleUFO.body.sprite.kill();
 	
 	//Create planet
 	planets = game.add.group(); //commented for testing
@@ -273,8 +275,12 @@ function create() {
 	ship.body.collides(ufoCollisionGroup,healup, this);
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
+	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	game.sound.setDecodedCallback([blaster,asterDestory,planetHit,planetDestory,BackgroundMusic,BackgroundMusic_2,BackgroundMusic_3], start, this);
+	
+	button = game.add.button(game.world.width/2+100, game.world.height/2, 'button', actionOnClick, this, 2, 1, 0);
+	
 	//timers
 	/*
 	zoomInTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
@@ -608,7 +614,7 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		scoreText.x = game.world.width/2;
 		scoreText.y = game.world.height/2-300;
 		scoreText.fontSize = 100;
-
+		game.time.events.add(Phaser.Timer.SECOND/2, function(){game.destory()}, this);
 	}
 //health change
 	if(health <= 80 && health > 60){
@@ -727,14 +733,49 @@ function zoomOut(){
 			if (zoomFactor > 1.0){
 			zoomFactor = zoomFactor - 0.05;
 			game.world.scale.setTo(zoomFactor);
-		}
+		}	
 	}
 }
 function healup(body1,body2){
+	if(health <= 80 && health > 60){
+			//BackgroundMusic.pause();
+			//BackgroundMusic_2.play();
+			//BackgroundMusic_3.pause();
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_80',0);
+		});}
+		else if(health <= 60 && health > 40){
+			//BackgroundMusic.pause();
+			//BackgroundMusic_2.pause();
+			//BackgroundMusic_3.play();
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_60',0);
+		});}
+		else if(health <= 40 && health > 20){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_40',0);
+		});}
+		else if(health <= 20&& health > 0){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_20',0);
+		});}
+		else if(health <= 0){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_0',0);
+			planetDestory.play();
+			health = 0;
+			healthText.setText('GameOver!');
+			healthText.x = game.world.width/2;
+			healthText.y = game.world.height/2-200;
+			healthText.fontSize = 100;
+		});}
 	health = health + 30;
 	healthText.setText("Planet' life is " + health);
 	body2.sprite.kill();
 }
+
+
+
 </script>
 </body>
 </html>
