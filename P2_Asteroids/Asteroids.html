@@ -26,7 +26,7 @@ function preload() {
 	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
 	game.load.image('Asteroid_small','assets/Asteroid_large.png');
 	game.load.image('bullet','assets/bullet.png');
-	game.load.image('ufo','assets/OG_UFO.png');
+	game.load.image('ufo','assets/Health_Pickup.png');
 	game.load.image('planet','assets/planet_100.png');
 	game.load.image('planet_80','assets/planet_80.png');
 	game.load.image('planet_60','assets/planet_60.png');
@@ -203,7 +203,7 @@ function create() {
     UFOs.physicsBodyType = Phaser.Physics.P2JS;
 	
 	var singleUFO = UFOs.create(200,25,'ufo');
-	singleUFO.scale.setTo(0.1,0.1);
+	//singleUFO.scale.setTo(0.1,0.1);
 	singleUFO.visible = false;
 	singleUFO.body.setRectangle(40,40);
 	singleUFO.body.setCollisionGroup(ufoCollisionGroup);
@@ -252,15 +252,25 @@ function create() {
 		//singleBullet.body.sprite.scale.set(0.1);
 		singleBullet.body.collides(asternoidCollisionGroup, bulletHite, this);
 		singleBullet.body.collides(planetCollisionGroup, planetHite, this);
-		singleBullet.body.collides(ufoCollisionGroup,destory, this);
+		//singleBullet.body.collides(ufoCollisionGroup,destory, this);
 		//singleBullet.body.damping = 0.0;
 	});
 
-	game.time.events.add(Phaser.Timer.SECOND*2, function(){
-		singleUFO.visible = true;
+	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
+		if(health < 100){
+		if(singleUFO.alive == false){
+			singleUFO.body.x = game.rnd.integerInRange(0,1024);
+			singleUFO.body.y = game.rnd.integerInRange(0,800);
+			singleUFO.body.velocity.x = game.rnd.integerInRange(-300, 300);
+			singleUFO.body.velocity.y = game.rnd.integerInRange(-300, 300);
+			singleUFO.visible = true;
+			singleUFO.alive = true;
+			singleUFO.exists = true;
+		}
+		}
 	}, this);
 	ship.body.collides(asternoidCollisionGroup,playProtect, this);
-	ship.body.collides(ufoCollisionGroup,null, this);
+	ship.body.collides(ufoCollisionGroup,healup, this);
 	ship.body.collides(planetCollisionGroup,null,this);
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -421,7 +431,7 @@ function update() {
 	});
 	
 	UFOs.forEach( function (ufo){
-		ufo.body.thrust(100);
+		//ufo.body.thrust(100);
 		if(ufo.body.x > 1024){
 			ufo.body.x = 0;
 		}else if(ufo.body.x < 0){
@@ -720,7 +730,11 @@ function zoomOut(){
 		}
 	}
 }
-
+function healup(body1,body2){
+	health = health + 30;
+	healthText.setText("Planet' life is " + health);
+	body2.sprite.kill();
+}
 </script>
 </body>
 </html>
