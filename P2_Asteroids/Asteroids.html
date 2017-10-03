@@ -81,7 +81,7 @@ var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var health = 10;
+var health = 100;
 var score = 0;
 var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
@@ -236,8 +236,8 @@ function create() {
 	});
 	}, this);
 	
-	//create asteroid medium
-	
+	//create asteroid anim group
+	AstColliAnimGroup = game.add.group();
 	
 	//Create UFOs
 	UFOs = game.add.group(); //commented for testing
@@ -930,7 +930,6 @@ function onResize(){
         movingGroup.x = Math.round((game.width-320)/2);
           movingGroup.y = Math.round((game.height-320)/2);        
     }
-
 
 </script>
 </body>
