@@ -76,7 +76,7 @@ var shipVelX;
 var shipVelY;
 var health = 100;
 var score = 0;
-var Asteroid_countNum = 4;
+var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
 var zoomInTimer;
 var zoomOutTimer;
@@ -189,6 +189,10 @@ function create() {
 	singleAsteroid.body.velocity.y = -30;
 	
 	singleAsteroid = Asteroids.create(1014,790,'Asteroid');
+	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.y = -150;
+	
+	singleAsteroid = Asteroids.create(512,790,'Asteroid');
 	singleAsteroid.body.velocity.x = -150;
 	singleAsteroid.body.velocity.y = -150;
 	
@@ -535,8 +539,8 @@ function update() {
                bullet.reset(x, y);
                 //bullet.lifespan = 1000;
                 bullet.body.rotation = ship.body.rotation;
-                bullet.body.velocity.x = 400 * Math.cos(ship.body.rotation);
-                bullet.body.velocity.y = 400 * Math.sin(ship.body.rotation);
+                bullet.body.velocity.x = 600 * Math.cos(ship.body.rotation);
+                bullet.body.velocity.y = 600 * Math.sin(ship.body.rotation);
                 if(game.time.now - bulletInterval < 20){
                     if(groupCounter == 4){
                         groupCounter = 1;
@@ -741,12 +745,16 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function checkForRespaw(){
-	if(Asteroid_countNum <= 3){
+	if(Asteroid_countNum <= 4){
 		var deadAsterois = Asteroids.getFirstExists(false);
-		deadAsterois.body.sprite.key = 'Asteroid';
-		deadAsterois.body.sprite.alive = true;
-		deadAsterois.body.sprite.exists = true;
-		deadAsterois.body.sprite.visible = true;
+		if(deadAsterois != null){
+			deadAsterois.body.sprite.key = 'Asteroid';
+			deadAsterois.body.sprite.alive = true;
+			deadAsterois.body.sprite.exists = true;
+			deadAsterois.body.sprite.visible = true;
+		}else{
+			//shall do something
+		}
 		if(score%2000 <= 1000){  // range of 5000 and 2000
 			var random = game.rnd.between(1,4);
 			if(random == 1){deadAsterois.body.x = 0;}
