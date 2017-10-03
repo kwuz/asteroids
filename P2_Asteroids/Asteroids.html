@@ -27,7 +27,7 @@ function preload() {
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
 	game.load.image('splash','assets/splash.png');
-	//game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
+	game.load.image('healBuff','assets/heal_glow.png');
 	game.load.image('Asteroid','assets/Asteroid_large.png');
 	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
 	game.load.image('Asteroid_small','assets/Asteroid_large.png');
@@ -59,7 +59,9 @@ var shipAnglerVelocity = 0;
 var shipAnglerAcce = 0.2;
 var shipAniFlag = false;
 var shipInOrbit = false;
+var shipHealBuff = false;
 var splash;
+var healBuff;
 var bulletInterval = 0;
 var groupInterval = 0;
 var groupCounter = 0;
@@ -74,7 +76,7 @@ var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var health = 100;
+var health = 10;
 var score = 0;
 var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
@@ -109,7 +111,6 @@ function create() {
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	//game.physics.p2.restitution = 1.0;
 	splash = game.add.sprite(0,0,'splash');
-	
 	//create sound
 	blaster = game.add.audio('blaster');
 	asterDestory = game.add.audio('asternoidDestory');
@@ -172,6 +173,9 @@ function create() {
 	ship.kill();
 	shipVelX = 0.0;
 	shipVelY = 0.0;
+	//create heal buff
+	healBuff = 	game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'healBuff');
+	healBuff.kill();
 	//create asteroid
 	Asteroids = game.add.group(); //commented for testing
 	Asteroids.enableBody = true;
@@ -233,6 +237,7 @@ function create() {
 	singleUFO.body.velocity.x = 30;
 	singleUFO.body.velocity.y = 30;
 	singleUFO.body.sprite.kill();
+	singleUFO.body.mass = 0.1;
 	
 	//Create planet
 	planets = game.add.group(); //commented for testing
@@ -387,8 +392,29 @@ function update() {
 				targetAngle = 360 + targetAngle;
 			}
 		}
-		
 		shipInOrbit = true;
+		// healup here
+		if(shipHealBuff){
+			health = health + 30;
+			if(health <= 80 && health > 60){
+				planets.forEach(function(singlePlanet){
+				singlePlanet.body.sprite.loadTexture('planet_80',0);
+				});}
+				else if(health <= 60 && health > 40){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_60',0);
+				});}
+				else if(health <= 40 && health > 20){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_40',0);
+				});}
+				else if(health <= 20&& health > 0){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_20',0);
+				});} 
+			shipHealBuff = false;
+			healBuff.visible = false;
+		}
 		zoomIn();
 		//game.time.events.pause(zoomOutTimer);
 		//game.time.events.resume(zoomInTimer);
@@ -570,7 +596,8 @@ function update() {
 			singleBullet.kill();
 		}
 	});
-	
+	healBuff.x = ship.x - 50;
+	healBuff.y = ship.y - 50;
 	guard = true;
 	//game.debug.text('Orbation' + shipInOrbit, 300,300);
 
@@ -684,7 +711,7 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		scoreText.x = game.world.width/2;
 		scoreText.y = game.world.height/2-300;
 		scoreText.fontSize = 100;
-		game.time.events.add(Phaser.Timer.SECOND/2, function(){game.destory();}, this);
+		game.time.events.add(Phaser.Timer.SECOND/2, function(){}, this);
 	}
 //health change
 	if(health <= 80 && health > 60){
@@ -725,9 +752,12 @@ function destory(body1,body2){
 	body2.sprite.kill();
 	}
 function moveToPlanet (planet) { 
-
-		accelerateToObject(ship,planet,200);
-
+	accelerateToObject(ship,planet,200);
+	}
+function moveToShip (ship) { 
+	UFOs.forEach(function(singleUFO){
+		accelerateToObject(singleUFO,ship,100);
+	},this);
 	}
 function accelerateToObject(obj1, obj2, speed) {
 	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
@@ -806,6 +836,7 @@ function zoomOut(){
 	}
 }
 function healup(body1,body2){
+	if(shipInOrbit){
 	health = health + 30;
 	if(health <= 80 && health > 60){
 			planets.forEach(function(singlePlanet){
@@ -822,18 +853,12 @@ function healup(body1,body2){
 		else if(health <= 20&& health > 0){
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_20',0);
-		});}
-		/*else if(health <= 0){
-			planets.forEach(function(singlePlanet){
-			singlePlanet.body.sprite.loadTexture('planet_0',0);
-			planetDestory.play();
-			health = 0;
-			healthText.setText('GameOver!');
-			healthText.x = game.world.width/2;
-			healthText.y = game.world.height/2-200;
-			healthText.fontSize = 100;
-		});}*/
-	//healthText.setText("Planet' life is " + health);
+		});} 
+		}
+	else{
+		healBuff.visible = true;
+		shipHealBuff = true;
+	}
 	body2.sprite.kill();
 }
 function goFullScreen(){
