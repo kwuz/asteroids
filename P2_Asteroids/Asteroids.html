@@ -51,8 +51,8 @@ function preload() {
 	game.load.audio('backGroundMusic','assets/background_a.mp3');
 	game.load.audio('backGroundMusic_2','assets/background_b.mp3');
 	game.load.audio('backGroundMusic_3','assets/background_c.mp3');
-	game.load.audio('healthPick','assets/asteroids_healthapply.mp3');
-	game.load.audio('healthApply','assets/asteroids_healthpickup.mp3');
+	game.load.audio('healthPick','assets/asteroids_healthapply.wav');
+	game.load.audio('healthApply','assets/asteroids_healthpickup.wav');
 	
 }
 var ship;
@@ -81,7 +81,7 @@ var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var health = 100;
+var health = 10;
 var score = 0;
 var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
@@ -130,8 +130,8 @@ function create() {
 	planetHit = game.add.audio('planetHit');
 	planetDestory = game.add.audio('planetDestory');
 	BackgroundMusic = game.add.audio('backGroundMusic');
-	healPick = game.add.audio('healPick');
-	healApply = game.add.audio('healApply');
+	healPick = game.add.audio('healthPick');
+	healApply = game.add.audio('healthApply');
 	BackgroundMusic.loop = true;
 	//BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
 	//BackgroundMusic_2.loop = true;
@@ -384,6 +384,7 @@ function update() {
 		shipInOrbit = true;
 		// healup here
 		if(shipHealBuff){
+			healApply.play();
 			health = health + 30;
 			if(health <= 80 && health > 60){
 				planets.forEach(function(singlePlanet){
@@ -861,6 +862,7 @@ function zoomOut(){
 }
 function healup(body1,body2){
 	if(shipInOrbit){
+	healApply.play();
 	health = health + 30;
 	if(health <= 80 && health > 60){
 			planets.forEach(function(singlePlanet){
@@ -880,12 +882,14 @@ function healup(body1,body2){
 		});} 
 		}
 	else{
+		healPick.play();
 		healBuff.visible = true;
 		shipHealBuff = true;
 	}
 	body2.sprite.kill();
 }
 function directHeal(body1,body2){
+	healApply.play();
 	health = health + 30;
 	if(health <= 80 && health > 60){
 			planets.forEach(function(singlePlanet){
