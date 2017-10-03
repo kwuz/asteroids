@@ -16,9 +16,14 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update,resize:onResize });
 
 function preload() {
+	this.game.scale.pageAlignHorizontally = true;this.game.scale.pageAlignVertically = true;this.game.scale.refresh();
+
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.windowConstraints.bottom = "visual";
+    game.scale.setShowAll();
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
 	game.load.image('splash','assets/splash.png');
@@ -45,6 +50,7 @@ function preload() {
 	game.load.audio('backGroundMusic','assets/background_a.mp3');
 	game.load.audio('backGroundMusic_2','assets/background_b.mp3');
 	game.load.audio('backGroundMusic_3','assets/background_c.mp3');
+	
 }
 var ship;
 var shipRadius = 100;
@@ -133,6 +139,7 @@ function create() {
 	planetCollisionGroup = game.physics.p2.createCollisionGroup();
 	//game.physics.p2.updateBoundsCollisionGroup();
 	//create text
+	
 	healthText = game.add.text(game.world.centerX+100, game.world.centerY-250, "Planet' life is " + health, { 
 		font: "30px Arial", 
 		fill: "#ffffff", 
@@ -140,7 +147,7 @@ function create() {
     healthText.anchor.setTo(0.5, 0.5);
 	healthText.visible = false;
 	
-	scoreText = game.add.text(game.world.centerX+100, game.world.centerY-200, "score is " + score, { 
+	scoreText = game.add.text(game.world.width - 100, 25, "score is " + score, { 
 		font: "30px Arial", 
 		fill: "#ffffff", 
 		align: "center" });
@@ -271,7 +278,7 @@ function create() {
 		singlePLanet.body.sprite.visible = true;
 		singlePLanet.body.sprite.exists = true;
 		singlePLanet.body.sprite.alive = true;
-		healthText.visible = true;
+		//healthText.visible = true;
 		scoreText.visible = true;
 		//game.add.reset();
 		
@@ -330,7 +337,7 @@ function create() {
 }	
 
 function update() {
-	game.debug.text('is Normal spaw? ----' + ((score%7000)<= 5000), 32, 32);
+	//game.debug.text('is Normal spaw? ----' + ((score%7000)<= 5000), 32, 32);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
@@ -538,7 +545,7 @@ function update() {
 	});
 	
 	guard = true;
-	game.debug.text('Orbation' + shipInOrbit, 300,300);
+	//game.debug.text('Orbation' + shipInOrbit, 300,300);
 
 	//zoom in controls
 }
@@ -616,20 +623,22 @@ function destoryNupdate(body1,body2){	// call this function to damage
 //damage change
 	if(body1.sprite.key == 'Asteroid'){
 		health = health - 15;
-		healthText.setText("Planet' life is " + health);
+		//healthText.setText("Planet' life is " + health);
 	}else if(body1.sprite.key == 'Asteroid_medium'){
 		health = health - 10;
-		healthText.setText("Planet' life is " + health);
+		//healthText.setText("Planet' life is " + health);
 	}else{
 		health = health - 5;
-		healthText.setText("Planet' life is " + health);
+		//healthText.setText("Planet' life is " + health);
 	}
 	if(health <= 0 ){
 		health = 0;
+		healthText.visible = true;
 		healthText.setText('GameOver!');
 		healthText.x = game.world.width/2;
 		healthText.y = game.world.height/2-200;
 		healthText.fontSize = 100;
+		planetDestory.play();
 		
 		//scoreText.setText('GameOver!');
 		scoreText.setText("Your score is " + score);
@@ -658,12 +667,12 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		else if(health <= 0){
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_0',0);
-			planetDestory.play();
+			//planetDestory.play();
 			health = 0;
-			healthText.setText('GameOver!');
-			healthText.x = game.world.width/2;
-			healthText.y = game.world.height/2-200;
-			healthText.fontSize = 100;
+			//healthText.setText('GameOver!');
+			//healthText.x = game.world.width/2;
+			//healthText.y = game.world.height/2-200;
+			//healthText.fontSize = 100;
 		});}
 		
 	body1.sprite.kill();
@@ -780,10 +789,30 @@ function healup(body1,body2){
 			healthText.y = game.world.height/2-200;
 			healthText.fontSize = 100;
 		});}*/
-	healthText.setText("Planet' life is " + health);
+	//healthText.setText("Planet' life is " + health);
 	body2.sprite.kill();
 }
+function goFullScreen(){
+        // setting a background color
+        game.stage.backgroundColor = "#ffffff ";
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
+        // using RESIZE scale mode
+        game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+        game.scale.setScreenSize(true);
+    }
 
+function onResize(){
+        // this function is called each time the browser is resized, and re-positions
+        // game elements to keep them in their right position according to game size
+        //levelText.x = Math.round((game.width-levelText.width)/2);
+        //levelText.y = game.height;
+        //titleText.x = Math.round((game.width-titleText.width)/2);
+        fixedGroup.x = Math.round((game.width-320)/2);
+          fixedGroup.y = Math.round((game.height-320)/2);
+        movingGroup.x = Math.round((game.width-320)/2);
+          movingGroup.y = Math.round((game.height-320)/2);        
+    }
 
 
 </script>
