@@ -485,9 +485,9 @@ function update() {
 	if (cursors.up.isDown && shipAniFlag == false)
     {
     	
-		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
-			ship.body.velocity.x += 10*Math.cos(ship.body.rotation);
-			ship.body.velocity.y += 10*Math.sin(ship.body.rotation);
+		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000.0){
+			ship.body.velocity.x += 7.5*Math.cos(ship.body.rotation);
+			ship.body.velocity.y += 7.5*Math.sin(ship.body.rotation);
 		}
 		shipInOrbit = false;
 		zoomOut();
