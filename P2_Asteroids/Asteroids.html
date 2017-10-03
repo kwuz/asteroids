@@ -43,6 +43,7 @@ function preload() {
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
 	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_16px.png',16,16,90);
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
+	game.load.spritesheet('AstColAnim','assets/AstroidDestruction.png',512,512,17);
 	
 	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
@@ -81,7 +82,7 @@ var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var health = 100;
+var health = 10;
 var score = 0;
 var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
@@ -125,13 +126,13 @@ function create() {
 	
 	dock.visible = false;
 	//create sound
-	blaster = game.add.audio('blaster');
-	asterDestory = game.add.audio('asternoidDestory');
-	planetHit = game.add.audio('planetHit');
-	planetDestory = game.add.audio('planetDestory');
-	BackgroundMusic = game.add.audio('backGroundMusic');
-	healPick = game.add.audio('healthPick');
-	healApply = game.add.audio('healthApply');
+	blaster = game.add.audio('blaster',1); //use the 1 to change volume, interval is (0,1)
+	asterDestory = game.add.audio('asternoidDestory',1);
+	planetHit = game.add.audio('planetHit',1);
+	planetDestory = game.add.audio('planetDestory',11);
+	BackgroundMusic = game.add.audio('backGroundMusic',1);
+	healPick = game.add.audio('healthPick',1);
+	healApply = game.add.audio('healthApply',1);
 	BackgroundMusic.loop = true;
 	//BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
 	//BackgroundMusic_2.loop = true;
@@ -605,6 +606,21 @@ function AsteroidCollide(body1,body2){
         var y = body2.sprite.body.y;
         
         if(key_1 == 'Asteroid' && key_2 == 'Asteroid'){
+		    var AnimPlay = AstColliAnimGroup.getFirstExists(false);
+			if(AnimPlay != null){
+			AnimPlay.alive = true;
+			AnimPlay.exists = true;
+			AnimPlay.visible = true;
+			AnimPlay.x =(body1.sprite.x+body2.sprite.x)/2-256;
+			AnimPlay.y =(body1.sprite.y+body2.sprite.y)/2-256;
+			AnimPlay.animations.play('play',24,false,true);
+				}else{
+			AnimPlay = AstColliAnimGroup.create(0,0,'AstColAnim');
+			AnimPlay.x =(body1.sprite.x+body2.sprite.x)/2-256;
+			AnimPlay.y =(body1.sprite.y+body2.sprite.y)/2-256;
+			AnimPlay.animations.add('play');
+			AnimPlay.animations.play('play',24,false,true);
+			}	
             body1.sprite.kill();
             body2.sprite.kill();
             Asteroid_countNum = Asteroid_countNum - 2;
@@ -629,7 +645,6 @@ function AsteroidCollide(body1,body2){
                 singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
             }
         }
-        
         asterDestory.play();
         checkForRespaw();
         
