@@ -76,7 +76,7 @@ var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
-var health = 10;
+var health = 100;
 var score = 0;
 var Asteroid_countNum = 5;
 var zoomFactor = 1.0;
@@ -90,8 +90,10 @@ var ufoCollisionGroup;
 var planetCollisionGroup;
 
 var bulletInterval = 0;
+var click = [false, false];
 //var collisionGuard = [0, 0];
 var guard = true;
+var guard_1 = true;
 var playProtectAnimation = false;
 
 var fireButton;
@@ -204,8 +206,9 @@ function create() {
 		singleAsteroid.scale.setTo(0.2,0.2);
 		singleAsteroid.body.setRectangle(50,50);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
-		singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
+		singleAsteroid.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
 		singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+		singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
 		singleAsteroid.body.damping = 0.0;
 		singleAsteroid.kill();
@@ -349,8 +352,6 @@ function create() {
 }	
 
 function update() {
-	//game.debug.text('Spaw position' + Math.cos(game.rnd.realInRange(-1,1))*400, 32, 32);
-	//game.debug.text('Spaw position' + Math.sin(game.rnd.realInRange(-1,1))*400, 32, 32);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
@@ -552,43 +553,29 @@ function update() {
 	}else if(ship.body.y < 0){
 		ship.body.y = game.world.height;
 	}
-	if (fireButton.isDown){
-    
-        if (game.time.now > bulletInterval) {
-            var bullet = bulletGroup.getFirstExists(false);
-            if (bullet) {
-                blaster.play();
-                var length = ship.width * 0.5;
-                var x = ship.body.x + (Math.cos(ship.body.rotation) * length);
-                var y = ship.body.y + (Math.sin(ship.body.rotation) * length);
-                
-               bullet.reset(x, y);
-                //bullet.lifespan = 1000;
-                bullet.body.rotation = ship.body.rotation;
-                bullet.body.velocity.x = 600 * Math.cos(ship.body.rotation);
-                bullet.body.velocity.y = 600 * Math.sin(ship.body.rotation);
-                if(game.time.now - bulletInterval < 20){
-                    if(groupCounter == 4){
-                        groupCounter = 1;
-                    }
-                    else{
-                        groupCounter ++;
-                    }
-                    
-                    if(groupCounter == 4){
-                        bulletInterval = game.time.now + 400;
-                    }
-                    else{
-                        bulletInterval = game.time.now + 200;
-                    }
-                }
-                else{
-                    groupCounter = 1;
-                    bulletInterval = game.time.now + 200;// bullet interval
-                }
-            }
-        }
-        
+	click[0] = click[1];
+	
+	if(fireButton.isDown){	
+		click[1] = true;
+	}
+	else{
+		click[1] = false;
+	}
+	
+	if (click[0]== false && click[1] == true){
+		var bullet = bulletGroup.getFirstExists(false);
+		if (bullet) {
+			blaster.play();
+			var length = ship.width * 0.5;
+			var x = ship.body.x + (Math.cos(ship.body.rotation) * length);
+			var y = ship.body.y + (Math.sin(ship.body.rotation) * length);
+			
+		   bullet.reset(x, y);
+			//bullet.lifespan = 1000;
+			bullet.body.rotation = ship.body.rotation;
+			bullet.body.velocity.x = 400 * Math.cos(ship.body.rotation);
+			bullet.body.velocity.y = 400 * Math.sin(ship.body.rotation);
+		}
    }
     
     bulletGroup.forEach(function (singleBullet){
@@ -599,6 +586,7 @@ function update() {
 	healBuff.x = ship.x - 50;
 	healBuff.y = ship.y - 50;
 	guard = true;
+	guard_1 = true;
 	//game.debug.text('Orbation' + shipInOrbit, 300,300);
 
 	//zoom in controls
@@ -611,12 +599,75 @@ function render(){
 function planetHite(body1,body2){
 	body1.sprite.kill();
 }
+function AsteroidCollide(body1,body2){
+	if(guard_1 == true){
+		guard_1 = false;
+		var key_1 = body1.sprite.key;
+		var key_2 = body1.sprite.key;
+		
+		var x = body2.sprite.body.x;
+		var y = body2.sprite.body.y;
+		
+		if(key_1 == 'Asteroid'){
+			body1.sprite.kill();
+			Asteroid_countNum = Asteroid_countNum - 1;
+		}
+		if(key_2 == 'Asteroid'){
+			body2.sprite.kill();
+			Asteroid_countNum = Asteroid_countNum - 1;
+		}
+		
+		asterDestory.play();
+		checkForRespaw();
+			
+		for (var i = 0; i < 2; i++){
+			if(key_1 == 'Asteroid'){
+				AstType = 0;
+				var singleAsteroid = Asteroids.create(x , y , 'Asteroid_medium');
+				Asteroid_countNum++;
+				singleAsteroid.scale.setTo(0.1, 0.1);
+				singleAsteroid.body.setRectangle(30,30);
+				singleAsteroid.body.thrust(100);
+				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
+				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
+				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+				singleAsteroid.body.collides([shipCollisionGroup, ufoCollisionGroup, bulletCollisionGroup]);
+				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+				singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+			}
+			
+		}
+		
+		for(var i = 0; i < 2; i++){
+			if(key_2 == 'Asteroid'){
+				AstType = 0;
+				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
+	
+				Asteroid_countNum++;
+				singleAsteroid.scale.setTo(0.1, 0.1);
+				singleAsteroid.body.setRectangle(30,30);
+				singleAsteroid.body.thrust(100);
+				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
+				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
+				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+				singleAsteroid.body.collides([shipCollisionGroup, ufoCollisionGroup, bulletCollisionGroup]);
+				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+				singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+			}
+		}
+		
+		
+	}
+}
 	
 function bulletHite(body1,body2){
 	if(guard == true){
 		guard = false;
 		var AstType = 1;
 		var size = body2.sprite.scale.x;
+	
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
 		
