@@ -330,7 +330,7 @@ function create() {
 }	
 
 function update() {
-	//game.debug.text('Asternoids on screen' + Asteroid_countNum, 390, 200);
+	game.debug.text('is Normal spaw? ----' + ((score%7000)<= 5000), 32, 32);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
@@ -441,29 +441,29 @@ function update() {
 	
 	Asteroids.forEach( function (singleAsteroid){
 		//singleAsteroid.body.thrust(100);
-		if(singleAsteroid.body.x > 1024){
+		if(singleAsteroid.body.x > game.world.width){
 			singleAsteroid.body.x = 0;
 		}else if(singleAsteroid.body.x < 0){
-			singleAsteroid.body.x = 1024;
+			singleAsteroid.body.x = game.world.width;
 		}
-		if(singleAsteroid.body.y > 800){
+		if(singleAsteroid.body.y > game.world.height){
 			singleAsteroid.body.y = 0;
 		}else if(singleAsteroid.body.y < 0){
-			singleAsteroid.body.y = 800;
+			singleAsteroid.body.y = game.world.height;
 		}
 	});
 	
 	UFOs.forEach( function (ufo){
 		//ufo.body.thrust(100);
-		if(ufo.body.x > 1024){
+		if(ufo.body.x > game.world.width){
 			ufo.body.x = 0;
 		}else if(ufo.body.x < 0){
-			ufo.body.x = 1024;
+			ufo.body.x = game.world.width;
 		}
-		if(ufo.body.y > 800){
+		if(ufo.body.y > game.world.height){
 			ufo.body.y = 0;
 		}else if(ufo.body.y < 0){
-			ufo.body.y = 800;
+			ufo.body.y = game.world.height;
 		}
 	});
 
@@ -485,7 +485,7 @@ function update() {
 		if(shipInOrbit == false){
 			ship.body.rotateLeft(100);
 		}
-		else if(shipAnglerVelocity >= -3){
+		else if(shipAnglerVelocity >= -2.2){
 			shipAnglerVelocity -= shipAnglerAcce;
 		}
 		playLeft();
@@ -495,21 +495,21 @@ function update() {
 		if(shipInOrbit == false){
 			ship.body.rotateRight(100);
 		}
-		else if(shipAnglerVelocity <= 3){
+		else if(shipAnglerVelocity <= 2.2){
 			shipAnglerVelocity += shipAnglerAcce;
 		}
 		playRight();
     }
 
-	if(ship.body.x > 1024){
+	if(ship.body.x > game.world.width){
 		ship.body.x = 0;
 	}else if(ship.body.x < 0){
-		ship.body.x = 1024;
+		ship.body.x = game.world.width;
 	}
-	if(ship.body.y > 800){
+	if(ship.body.y > game.world.height){
 		ship.body.y = 0;
 	}else if(ship.body.y < 0){
-		ship.body.y = 800;
+		ship.body.y = game.world.height;
 	}
 	if (fireButton.isDown){
 		if (game.time.now > bulletInterval) {
@@ -640,16 +640,10 @@ function destoryNupdate(body1,body2){	// call this function to damage
 	}
 //health change
 	if(health <= 80 && health > 60){
-			//BackgroundMusic.pause();
-			//BackgroundMusic_2.play();
-			//BackgroundMusic_3.pause();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_80',0);
 		});}
 		else if(health <= 60 && health > 40){
-			//BackgroundMusic.pause();
-			//BackgroundMusic_2.pause();
-			//BackgroundMusic_3.play();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_60',0);
 		});}
@@ -709,7 +703,7 @@ function checkForRespaw(){
 		deadAsterois.body.sprite.alive = true;
 		deadAsterois.body.sprite.exists = true;
 		deadAsterois.body.sprite.visible = true;
-		if(!shipInOrbit){
+		if(score%7000 <= 5000){  // range of 5000 and 2000
 			var random = game.rnd.between(1,4);
 			if(random == 1){deadAsterois.body.x = 0;}
 			if(random == 2){deadAsterois.body.y =0;}
@@ -759,17 +753,12 @@ function zoomOut(){
 	}
 }
 function healup(body1,body2){
+	health = health + 30;
 	if(health <= 80 && health > 60){
-			//BackgroundMusic.pause();
-			//BackgroundMusic_2.play();
-			//BackgroundMusic_3.pause();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_80',0);
 		});}
 		else if(health <= 60 && health > 40){
-			//BackgroundMusic.pause();
-			//BackgroundMusic_2.pause();
-			//BackgroundMusic_3.play();
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_60',0);
 		});}
@@ -781,7 +770,7 @@ function healup(body1,body2){
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_20',0);
 		});}
-		else if(health <= 0){
+		/*else if(health <= 0){
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_0',0);
 			planetDestory.play();
@@ -790,8 +779,7 @@ function healup(body1,body2){
 			healthText.x = game.world.width/2;
 			healthText.y = game.world.height/2-200;
 			healthText.fontSize = 100;
-		});}
-	health = health + 30;
+		});}*/
 	healthText.setText("Planet' life is " + health);
 	body2.sprite.kill();
 }
