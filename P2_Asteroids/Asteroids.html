@@ -45,7 +45,7 @@ function preload() {
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
 	game.load.spritesheet('AstColAnim','assets/AstroidDestruction.png',512,512,17);
 	game.load.spritesheet('TorColAnim','assets/TorpedeoExplosion_Spritesheet.png',512,512,15);
-	game.load.spritesheet('FinalExplode','assets/PlanetExplosion_Spritesheet.png',1300,1300,35);
+	game.load.spritesheet('FinalExplode','assets/PlanetExplosion_Spritesheet.png',650,650,35);
 	
 	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
@@ -88,7 +88,7 @@ var shipVelX;
 var shipVelY;
 var health = 100;
 var score = 0;
-var Asteroid_countNum = 5;
+var Asteroid_countNum = 6;
 var zoomFactor = 1.0;
 var zoomInTimer;
 var zoomOutTimer;
@@ -131,8 +131,8 @@ function create() {
 	dock.scale.setTo(0.1,0.1);
 	dock.visible = false;
 	//create final expppppppppppppppppppppppppppppppppplllllllllllllllllllllllllllllllloooooooooooooooooooooooodddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeee!!!!!!!!!!!!!!!!!!
-	finalExplode = game.add.sprite(game.world.width/2-300,game.world.height/2-300,'FinalExplode');
-	finalExplode.scale.setTo(0.5,0.5);
+	finalExplode = game.add.sprite(game.world.width/2-325,game.world.height/2-325,'FinalExplode');
+	//finalExplode.scale.setTo(0.5,0.5);
 	finalExplode.animations.add('explode');
 	finalExplode.kill();
 	//create sound
@@ -205,17 +205,17 @@ function create() {
 	singleAsteroid.body.velocity.y = -30;
 	
 	singleAsteroid = Asteroids.create(1014,790,'Asteroid');
-	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.x = -50;
 	singleAsteroid.body.velocity.y = -150;
 	
 	singleAsteroid = Asteroids.create(512,790,'Asteroid');
-	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.x = -30;
 	singleAsteroid.body.velocity.y = -150;
 	
-	singleAsteroid = Asteroids.create(214,790,'Asteroid');
-	singleAsteroid.body.velocity.x = -150;
-	singleAsteroid.body.velocity.y = -150;
-	singleAsteroid.body.sprite.kill();
+	singleAsteroid = Asteroids.create(512,0,'Asteroid');
+	singleAsteroid.body.velocity.x = 30;
+	singleAsteroid.body.velocity.y = 150;
+	//singleAsteroid.body.sprite.kill();
 	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
@@ -645,6 +645,7 @@ function AsteroidCollide(body1,body2){
 	
 function bulletHite(body1,body2){
 	if(guard == true){
+	
 		guard = false;
 		var AstType = 1;
 		var size = body2.sprite.scale.x;
@@ -717,6 +718,7 @@ function bulletHite(body1,body2){
 				AstType = 2;
 			}
 		}
+		game.camera.shake(0.01, 50);
 		
 		if(AstType == 0){score = score +20;}
 		else if(AstType ==1) {score = score +50;}
@@ -773,7 +775,6 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		
 		game.time.events.add(Phaser.Timer.SECOND/2, function(){}, this);
 		
-		game.debug.text('UDCM',30,500);
 	}
 //health change
 	if(health <= 80 && health > 60){
