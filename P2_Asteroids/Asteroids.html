@@ -60,7 +60,7 @@ function preload() {
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
 	game.load.audio('planetHit','assets/asteroids_planethit.wav');
 	game.load.audio('planetDestory','assets/asteroids_planetdestroy1.wav');
-	game.load.audio('backGroundMusic','assets/background_a.mp3');
+	game.load.audio('backGroundMusic','assets/background_d.mp3');
 	game.load.audio('backGroundMusic_2','assets/background_b.mp3');
 	game.load.audio('backGroundMusic_3','assets/background_c.mp3');
 	game.load.audio('healthPick','assets/asteroids_healthapply.wav');
@@ -151,8 +151,8 @@ function create() {
 	finalExplode.kill();
 	//create sound
 	blaster = game.add.audio('blaster',1); //use the 1 to change volume, interval is (0,1)
-	asterDestory = game.add.audio('asternoidDestory',1);
-	planetHit = game.add.audio('planetHit',1);
+	asterDestory = game.add.audio('asternoidDestory',0.1);
+	planetHit = game.add.audio('planetHit',0.5);
 	planetDestory = game.add.audio('planetDestory',1);
 	BackgroundMusic = game.add.audio('backGroundMusic',1);
 	healPick = game.add.audio('healthPick',1);
@@ -867,7 +867,7 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function checkForRespaw(){
-	if(Asteroid_countNum <= 5){
+	if(Asteroid_countNum <= 7){ // change this par
 		var deadAsterois = Asteroids.getFirstExists(false);
 		if(deadAsterois != null){
 			
@@ -878,11 +878,18 @@ function checkForRespaw(){
 			deadAsterois.body.setRectangle(60,60);
 			deadAsterois.scale.setTo(0.2,0.2);
 			deadAsterois.body.setCollisionGroup(asternoidCollisionGroup);
-		deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
-		deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
-		deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+			deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
+			deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
+			deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		}else{
 			//shall do something
+			deadAsterois = Asteroids.create(0,0,'Asteroid');
+			deadAsterois.body.setRectangle(60,60);
+			deadAsterois.scale.setTo(0.2,0.2);
+			deadAsterois.body.setCollisionGroup(asternoidCollisionGroup);
+			deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
+			deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
+			deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		}
 		if(score%2000 <= 1000){  // range of 5000 and 2000
 			var random = game.rnd.between(1,4);
