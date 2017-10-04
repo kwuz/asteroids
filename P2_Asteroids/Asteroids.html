@@ -14,6 +14,14 @@
 </head>
 <body>
 
+<div style="margin-right:2px;">
+	<img src="assets/cabinet_art_left.png" align="left" width="230px" height="606px">
+</div>
+
+<div style="margin-left:10px;">
+	<img src="assets/cabinet_art_right.png" align="right" width="264px" height="606px">
+</div>
+
 <script type="text/javascript">
 
 var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update,resize:onResize });
@@ -26,11 +34,13 @@ function preload() {
     game.scale.setShowAll();
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
+	game.load.image('gameover','assets/gameover.png');
 	game.load.image('splash','assets/splash.png');
-	//game.load.image('ship','assets/OG_Ship.png');		// Ship and other art are far too large, draw by myself then
-	game.load.image('Asteroid','assets/Asteroid_large.png');
-	game.load.image('Asteroid_medium','assets/Asteroid_large.png');
-	game.load.image('Asteroid_small','assets/Asteroid_large.png');
+	game.load.image('healBuff','assets/heal_glow.png');
+	game.load.image('Dock','assets/PlannetDock.png');
+	game.load.image('Asteroid','assets/asteroid_large.png');
+	game.load.image('Asteroid_medium','assets/asteroid_large.png');
+	game.load.image('Asteroid_small','assets/asteroid_large.png');
 	game.load.image('bullet','assets/bullet.png');
 	game.load.image('ufo','assets/Health_Pickup.png');
 	game.load.image('planet','assets/planet_100.png');
@@ -40,16 +50,21 @@ function preload() {
 	game.load.image('planet_20','assets/planet_20.png');
 	game.load.image('planet_0','assets/planet_0.png');
 	game.load.spritesheet('baddie','assets/baddie.png',32,32,4);
-	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_8px.png',8,8,90);
+	game.load.spritesheet('Torpedo','assets/TorpedoSpriteSheet_16px.png',16,16,90);
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
+	game.load.spritesheet('AstColAnim','assets/AstroidDestruction.png',512,512,17);
+	game.load.spritesheet('TorColAnim','assets/TorpedeoExplosion_Spritesheet.png',512,512,15);
+	game.load.spritesheet('FinalExplode','assets/PlanetExplosion_Spritesheet.png',650,650,35);
 	
 	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
 	game.load.audio('planetHit','assets/asteroids_planethit.wav');
 	game.load.audio('planetDestory','assets/asteroids_planetdestroy1.wav');
-	game.load.audio('backGroundMusic','assets/background_a.mp3');
-	game.load.audio('backGroundMusic_2','assets/backgro	nd_b.mp3');
+	game.load.audio('backGroundMusic','assets/background_d.mp3');
+	game.load.audio('backGroundMusic_2','assets/background_b.mp3');
 	game.load.audio('backGroundMusic_3','assets/background_c.mp3');
+	game.load.audio('healthPick','assets/asteroids_healthapply.wav');
+	game.load.audio('healthApply','assets/asteroids_healthpickup.wav');
 	
 }
 var ship;
@@ -59,7 +74,12 @@ var shipAnglerVelocity = 0;
 var shipAnglerAcce = 0.2;
 var shipAniFlag = false;
 var shipInOrbit = false;
+var shipHealBuff = false;
 var splash;
+var dock;
+var healBuff;
+var gameOverSplash;
+var finalExplode;
 var bulletInterval = 0;
 var groupInterval = 0;
 var groupCounter = 0;
@@ -70,13 +90,15 @@ var UFOs;
 var planets;
 var Asteroids;
 var bulletGroup;
+var AstColliAnimGroup;
+var TorColliAnimGroup;
 var healthText;
 var scoreText;
 var shipVelX;
 var shipVelY;
 var health = 100;
 var score = 0;
-var Asteroid_countNum = 4;
+var Asteroid_countNum = 6;
 var zoomFactor = 1.0;
 var zoomInTimer;
 var zoomOutTimer;
@@ -104,38 +126,39 @@ var planetDestory;
 var BackgroundMusic;
 var BackgroundMusic_2;
 var BackgroundMusic_3;
+var healPick;
+var healApply;
 function create() {
 	//basic initiation
 	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
-	
+	//game.physics.p2.restitution = 0.0
+	//create game over
+	gameOverSplash = game.add.sprite(0,0,'gameover');
+	gameOverSplash.scale.setTo(0.5,0.5);
+	gameOverSplash.kill();
+	//create splash
 	splash = game.add.sprite(0,0,'splash');
-	
+	//create dock
+	dock = game.add.sprite(game.world.width/2-100,game.world.height/2-100,'Dock');
+	dock.scale.setTo(0.1,0.1);
+	dock.visible = false;
+	//create final expppppppppppppppppppppppppppppppppplllllllllllllllllllllllllllllllloooooooooooooooooooooooodddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeee!!!!!!!!!!!!!!!!!!
+	finalExplode = game.add.sprite(game.world.width/2-325,game.world.height/2-325,'FinalExplode');
+	//finalExplode.scale.setTo(0.5,0.5);
+	finalExplode.animations.add('explode');
+	finalExplode.kill();
 	//create sound
-	blaster = game.add.audio('blaster');
-	asterDestory = game.add.audio('asternoidDestory');
-	planetHit = game.add.audio('planetHit');
-	planetDestory = game.add.audio('planetDestory');
-	BackgroundMusic = game.add.audio('backGroundMusic');
+	blaster = game.add.audio('blaster',1); //use the 1 to change volume, interval is (0,1)
+	asterDestory = game.add.audio('asternoidDestory',0.1);
+	planetHit = game.add.audio('planetHit',0.5);
+	planetDestory = game.add.audio('planetDestory',1);
+	BackgroundMusic = game.add.audio('backGroundMusic',1);
+	healPick = game.add.audio('healthPick',1);
+	healApply = game.add.audio('healthApply',1);
 	BackgroundMusic.loop = true;
-	//BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
-	//BackgroundMusic_2.loop = true;
-	//BackgroundMusic_3 = game.add.audio('backGroundMusic_3');
-	//BackgroundMusic_3.loop = true;
 	BackgroundMusic.play();
-	//BackgroundMusic_2.play();
-	//BackgroundMusic_3.play();
-	//BackgroundMusic_2.pause();
-	//BackgroundMusic_3.pause();
-	//
-	//create spritesheet
-	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
-	TorpedoSprite.animations.add('glow');
-	TorpedoSprite.animations.play('glow', 50, true);
-	game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
-    game.physics.p2.restitution = 0.0;*/
-
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
 	bulletCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -158,7 +181,17 @@ function create() {
 		align: "center" });
 	scoreText.anchor.setTo(0.5, 0.5);
 	scoreText.visible = false;
-	//create splahs
+	
+	finalText = game.add.text(game.world.width/2, game.world.height/2-300, "Final Score : " + score, { 
+		font: "100px Arial", 
+		fill: "#ffffff", 
+		align: "center" });
+	finalText.anchor.setTo(0.5, 0.5);
+	finalText.visible = false;
+	
+
+	//create anim group
+	
 	// create ship
 	ship = game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'ship');
 	ship.animations.add('protect',[6,13,20,27,34,41],true);
@@ -174,6 +207,10 @@ function create() {
 	ship.kill();
 	shipVelX = 0.0;
 	shipVelY = 0.0;
+	//create heal buff
+	healBuff = 	game.add.sprite(game.world.width/2 + 200,game.world.height/2 + 200,'healBuff');
+	//healBuff.anchor = (0.5,0.5);
+	healBuff.kill();
 	//create asteroid
 	Asteroids = game.add.group(); //commented for testing
 	Asteroids.enableBody = true;
@@ -191,17 +228,27 @@ function create() {
 	singleAsteroid.body.velocity.y = -30;
 	
 	singleAsteroid = Asteroids.create(1014,790,'Asteroid');
-	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.x = -50;
 	singleAsteroid.body.velocity.y = -150;
+	
+	singleAsteroid = Asteroids.create(512,790,'Asteroid');
+	singleAsteroid.body.velocity.x = -30;
+	singleAsteroid.body.velocity.y = -150;
+	
+	singleAsteroid = Asteroids.create(512,0,'Asteroid');
+	singleAsteroid.body.velocity.x = 30;
+	singleAsteroid.body.velocity.y = 150;
+	//singleAsteroid.body.sprite.kill();
 	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
-		singleAsteroid.body.setRectangle(50,50);
+		singleAsteroid.body.setRectangle(60,60);
 		singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 		singleAsteroid.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
 		singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 		singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+		//singleAsteroid.body.mass = 0.1;
 		singleAsteroid.body.damping = 0.0;
 		singleAsteroid.kill();
 	});
@@ -214,8 +261,8 @@ function create() {
 	});
 	}, this);
 	
-	//create asteroid medium
-	
+	//create asteroid anim group
+	AstColliAnimGroup = game.add.group();
 	
 	//Create UFOs
 	UFOs = game.add.group(); //commented for testing
@@ -223,15 +270,17 @@ function create() {
     UFOs.physicsBodyType = Phaser.Physics.P2JS;
 	
 	var singleUFO = UFOs.create(200,25,'ufo');
-	//singleUFO.scale.setTo(0.1,0.1);
-	singleUFO.body.setRectangle(40,40);
+	singleUFO.scale.setTo(0.1,0.1);
+	singleUFO.body.setRectangle(20,50);
 	singleUFO.body.setCollisionGroup(ufoCollisionGroup);
-	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,planetCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,]);
+	singleUFO.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup,]);
+	singleUFO.body.collides(planetCollisionGroup,directHeal,this);
 	singleUFO.body.rotateLeft(game.rnd.integerInRange(100, 200));
 	singleUFO.body.damping = 0.0;
 	singleUFO.body.velocity.x = 30;
 	singleUFO.body.velocity.y = 30;
 	singleUFO.body.sprite.kill();
+	singleUFO.body.mass = 0.1;
 	
 	//Create planet
 	planets = game.add.group(); //commented for testing
@@ -239,7 +288,7 @@ function create() {
     planets.physicsBodyType = Phaser.Physics.P2JS;
 	
 	var singlePLanet = planets.create(game.world.width/2,game.world.height/2,'planet');
-	singlePLanet.scale.setTo(0.17,0.17);
+	singlePLanet.scale.setTo(0.3,0.3);
 	singlePLanet.body.setCircle(50);
 	singlePLanet.body.setCollisionGroup(planetCollisionGroup);
 	singlePLanet.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,planetCollisionGroup, bulletCollisionGroup]);
@@ -259,23 +308,13 @@ function create() {
     bulletGroup.setAll('anchor.y', 0.5);
 
     bulletGroup.forEach(function(singleBullet){
-		//TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'Torpedo');
-		//singleBullet.body.sprite.key = 'Torpedo';
-		//TorpedoSprite.animations.add('glow');
-		//TorpedoSprite.animations.play('glow', 50, true);
-		//singleBullet.scale.setTo(0.1,0.1);
-		//singleBullet.body.setRectangle(40,40);
-		//Baddie = game.add.tileSprite(game.world.width/2,game.world.height/2,256,256,'baddie');
-		//singleBullet.body.sprite.key = 'baddie';
-		//singleBullet.body.sprite = TorpedoSprite;
-		
 		singleBullet.body.setCollisionGroup(bulletCollisionGroup);
-		//singleBullet.body.sprite.scale.set(0.1);
 		singleBullet.body.collides(asternoidCollisionGroup, bulletHite, this);
 		singleBullet.body.collides(planetCollisionGroup, planetHite, this);
-		//singleBullet.body.collides(ufoCollisionGroup,destory, this);
-		//singleBullet.body.damping = 0.0;
 	});
+	// bullet Animation
+	TorColliAnimGroup = game.add.group();
+	
 	game.time.events.add(Phaser.Timer.SECOND*2, function(){
 		splash.kill();
 		ship.body.sprite.visible = true;
@@ -286,15 +325,21 @@ function create() {
 		singlePLanet.body.sprite.alive = true;
 		//healthText.visible = true;
 		scoreText.visible = true;
+		dock.visible = true;
 		//game.add.reset();
 		
 	}, this);
 
 	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
 		if(health < 30){
-		if(singleUFO.alive == false){
+		if(singleUFO.alive == false && shipHealBuff == false){
 			singleUFO.body.x = game.rnd.integerInRange(0,1024);
 			singleUFO.body.y = game.rnd.integerInRange(0,800);
+			var random = game.rnd.between(1,4);
+			if(random == 1){singleUFO.body.x = 0;}
+			if(random == 2){singleUFO.body.y =0;}
+			if(random == 3){singleUFO.body.x = game.world.width;}
+			if(random == 4){singleUFO.body.y = game.world.height;}
 			singleUFO.body.velocity.x = game.rnd.integerInRange(-300, 300);
 			singleUFO.body.velocity.y = game.rnd.integerInRange(-300, 300);
 			singleUFO.visible = true;
@@ -309,47 +354,19 @@ function create() {
 	cursors = game.input.keyboard.createCursorKeys();
 	cursors = game.input.keyboard.createCursorKeys();
 	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	game.sound.setDecodedCallback([blaster,asterDestory,planetHit,planetDestory,BackgroundMusic,BackgroundMusic_2,BackgroundMusic_3], start, this);
+	game.sound.setDecodedCallback([blaster,asterDestory,planetHit,planetDestory,BackgroundMusic,BackgroundMusic_2,BackgroundMusic_3,healPick,healApply], start, this);
 	
 	button = game.add.button(game.world.width/2+100, game.world.height/2, 'button', actionOnClick, this, 2, 1, 0);
-	
-	//timers
-	/*
-	zoomInTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
-		zoomFactor = zoomFactor + 0.1;
-		game.world.scale.setTo(zoomFactor);
-	}, this);
-	zoomInTimer.pause();
-	
-	zoomOutTimer = game.time.events.loop(Phaser.Timer.SECOND/10, function(){
-		zoomFactor = zoomFactor - 0.1;
-		game.world.scale.setTo(zoomFactor);
-	}, this);
-	zoomOutTimer.pause();*/	
-	/*
-	zoomInTimer = game.time.events.repeat(Phaser.Timer.SECOND*0.1, 10, function(){
-			if (zoomFactor <= 1.5){
-			zoomFactor = zoomFactor + 0.05;
-			game.world.scale.setTo(zoomFactor);
-		}
-	}, this);
-	
-	zoomOutTimer = game.time.events.repeat(Phaser.Timer.SECOND*0.1, 10, function(){
-			if (zoomFactor > 1.0){
-			zoomFactor = zoomFactor - 0.05;
-			game.world.scale.setTo(zoomFactor);
-		}
-	}, this);*/
 }	
 
 function update() {
-	game.debug.text('AN' + Asteroid_countNum, 32, 92);
-	game.debug.text('Spaw position' + Math.sin(game.rnd.realInRange(-1,1))*400, 32, 32);
 	//game.debug.spriteInfo(ship, 32, 32);
 	//game.debug.text('shipX: ' + ship.body.velocity.x + 'shipY: ' +  ship.body.velocity.x, 32, 170);
 	//game.debug.text('targetAngle: ' + targetAngle , 32, 200);
 	//game.world.scale.setTo(zoomFactor);
-	planets.forEach(moveToPlanet,this);
+    if(shipInOrbit == false){
+        planets.forEach(moveToPlanet,this);
+    }
 	if(shipAniFlag == false){
 		ship.body.angularVelocity = 0;
 	}
@@ -386,9 +403,31 @@ function update() {
 				targetAngle = 360 + targetAngle;
 			}
 		}
-		
 		shipInOrbit = true;
-		zoomIn();
+		// healup here
+		if(shipHealBuff){
+			healApply.play();
+			health = health + 30;
+			if(health <= 80 && health > 60){
+				planets.forEach(function(singlePlanet){
+				singlePlanet.body.sprite.loadTexture('planet_80',0);
+				});}
+				else if(health <= 60 && health > 40){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_60',0);
+				});}
+				else if(health <= 40 && health > 20){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_40',0);
+				});}
+				else if(health <= 20&& health > 0){
+					planets.forEach(function(singlePlanet){
+					singlePlanet.body.sprite.loadTexture('planet_20',0);
+				});} 
+			shipHealBuff = false;
+			healBuff.visible = false;
+		}
+		//zoomIn();
 		//game.time.events.pause(zoomOutTimer);
 		//game.time.events.resume(zoomInTimer);
 		shipAngle = targetAngle;
@@ -465,10 +504,11 @@ function update() {
 		}else if(singleAsteroid.body.y < 0){
 			singleAsteroid.body.y = game.world.height;
 		}
+		singleAsteroid.body.thrust(10);
 	});
 	
 	UFOs.forEach( function (ufo){
-		//ufo.body.thrust(100);
+		//ufo.body.thrust(1);
 		if(ufo.body.x > game.world.width){
 			ufo.body.x = 0;
 		}else if(ufo.body.x < 0){
@@ -481,19 +521,29 @@ function update() {
 		}
 	});
 
-	if (cursors.up.isDown && shipAniFlag == false)
-    {
-    	
-		if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000){
-			ship.body.velocity.x += 10*Math.cos(ship.body.rotation);
-			ship.body.velocity.y += 10*Math.sin(ship.body.rotation);
-		}
-		shipInOrbit = false;
-		zoomOut();
-		//game.time.events.pause(zoomInTimer);
-		//game.time.events.resume(zoomOutTimer);
-		playThrust();
+if (cursors.up.isDown && shipAniFlag == false)
+{
+    if(shipInOrbit){
+        shipInOrbit = false;
+        var rad = Phaser.Math.degToRad(shipAngle);
+        ship.body.x = ship.body.x + Math.cos(rad)*2;
+        ship.body.y = ship.body.y + Math.sin(rad)*2;
+        ship.body.velocity.x = 100*Math.cos(ship.body.rotation);
+        ship.body.velocity.y = 100*Math.sin(ship.body.rotation);
     }
+    else{
+        if(ship.body.velocity.x * ship.body.velocity.x + ship.body.velocity.y * ship.body.velocity.y < 60000.0){
+            ship.body.velocity.x += 7.5*Math.cos(ship.body.rotation);
+            ship.body.velocity.y += 7.5*Math.sin(ship.body.rotation);
+        }
+        
+    }
+    
+    //zoomOut();
+    //game.time.events.pause(zoomInTimer);
+    //game.time.events.resume(zoomOutTimer);
+    playThrust();
+}
     if (cursors.left.isDown && shipAniFlag == false)
     {
 		if(shipInOrbit == false){
@@ -525,7 +575,6 @@ function update() {
 	}else if(ship.body.y < 0){
 		ship.body.y = game.world.height;
 	}
-	
 	click[0] = click[1];
 	
 	if(fireButton.isDown){	
@@ -544,21 +593,50 @@ function update() {
 			var y = ship.body.y + (Math.sin(ship.body.rotation) * length);
 			
 		   bullet.reset(x, y);
-			//bullet.lifespan = 1000;
+			
 			bullet.body.rotation = ship.body.rotation;
-			bullet.body.velocity.x = 400 * Math.cos(ship.body.rotation);
-			bullet.body.velocity.y = 400 * Math.sin(ship.body.rotation);
+            if(shipInOrbit){
+                bullet.body.velocity.x = 400 * Math.cos(ship.body.rotation);
+                bullet.body.velocity.y = 400 * Math.sin(ship.body.rotation);
+            }
+            else{
+                bullet.lifespan = 1000;
+                bullet.body.velocity.x = 900 * Math.cos(ship.body.rotation);
+                bullet.body.velocity.y = 900 * Math.sin(ship.body.rotation);
+            }
+			
 		}
-        
-        
    }
+    if(shipInOrbit){
+        bulletGroup.forEach(function (singleBullet){
+                            if(singleBullet.body.x >= 1024 || singleBullet.body.x <= 0 || singleBullet.body.y >= 800 || singleBullet.body.y <= 0){
+                            singleBullet.kill();
+                            }
+                            });
+        
+    }
+    else{
+        bulletGroup.forEach(function (singleBullet){
+                            /*if(singleBullet.body.x >= 1024 || singleBullet.body.x <= 0 || singleBullet.body.y >= 800 || singleBullet.body.y <= 0){
+                             singleBullet.kill();
+                             }*/
+                            if(singleBullet.body.x >= game.world.width){
+                            singleBullet.body.x = 0;
+                            }else if(singleBullet.body.x <= 0){
+                            singleBullet.body.x = game.world.width;
+                            }
+                            if(singleBullet.body.y >= game.world.height){
+                            singleBullet.body.y = 0;
+                            }else if(singleBullet.body.y <= 0){
+                            singleBullet.body.y = game.world.height;
+                            }
+                            
+                            });
+    }
     
-    bulletGroup.forEach(function (singleBullet){
-		if(singleBullet.body.x >= 1024 || singleBullet.body.x <= 0 || singleBullet.body.y >= 800 || singleBullet.body.y <= 0){
-			singleBullet.kill();
-		}
-	});
-	
+    
+	healBuff.x = ship.x - 50;
+	healBuff.y = ship.y - 50;
 	guard = true;
 	guard_1 = true;
 	//game.debug.text('Orbation' + shipInOrbit, 300,300);
@@ -573,77 +651,94 @@ function render(){
 function planetHite(body1,body2){
 	body1.sprite.kill();
 }
+/*
+var velocityValue = 200;
+				var rad = Phaser.Math.degToRad(game.rnd.integerInRange(0, 360));
+				singleAsteroid.body.velocity.x = Math.cos(rad) * velocityValue;
+                singleAsteroid.body.velocity.y = Math.sin(rad) * velocityValue;
+                singleAsteroid.body.x += (-0.5 + i)*40;
+*/
 function AsteroidCollide(body1,body2){
-	if(guard_1 == true){
-		guard_1 = false;
-		var key_1 = body1.sprite.key;
-		var key_2 = body1.sprite.key;
-		
-		var x = body2.sprite.body.x;
-		var y = body2.sprite.body.y;
-		
-		if(key_1 == 'Asteroid'){
-			body1.sprite.kill();
-			Asteroid_countNum = Asteroid_countNum - 1;
-		}
-		if(key_2 == 'Asteroid'){
-			body2.sprite.kill();
-			Asteroid_countNum = Asteroid_countNum - 1;
-		}
-		
-		asterDestory.play();
-		checkForRespaw();
-			
-		for (var i = 0; i < 2; i++){
-			if(key_1 == 'Asteroid'){
-				AstType = 0;
-				var singleAsteroid = Asteroids.create(x , y , 'Asteroid_medium');
-				Asteroid_countNum++;
-				singleAsteroid.scale.setTo(0.1, 0.1);
-				singleAsteroid.body.setRectangle(30,30);
-				singleAsteroid.body.thrust(100);
-				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
-				singleAsteroid.body.collides([shipCollisionGroup, ufoCollisionGroup, bulletCollisionGroup]);
-				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
-				singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
-				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
-			}
-			
-		}
-		
-		for(var i = 0; i < 2; i++){
-			if(key_2 == 'Asteroid'){
-				AstType = 0;
-				var singleAsteroid = Asteroids.create(x, y, 'Asteroid_medium');
-	
-				Asteroid_countNum++;
-				singleAsteroid.scale.setTo(0.1, 0.1);
-				singleAsteroid.body.setRectangle(30,30);
-				singleAsteroid.body.thrust(100);
-				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
-				singleAsteroid.body.collides([shipCollisionGroup, ufoCollisionGroup, bulletCollisionGroup]);
-				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
-				singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
-				singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
-			}
-		}
-		
-		
-	}
+    if(guard_1 == true){
+        guard_1 = false;
+        var key_1 = body1.sprite.key;
+        var key_2 = body2.sprite.key;
+        
+        var x = body2.sprite.body.x;
+        var y = body2.sprite.body.y;
+        
+        if(key_1 == 'Asteroid' && key_2 == 'Asteroid'){
+		    var AnimPlay = AstColliAnimGroup.getFirstExists(false);
+			if(AnimPlay != null){
+			AnimPlay.alive = true;
+			AnimPlay.exists = true;
+			AnimPlay.visible = true;
+			AnimPlay.x =(body1.sprite.body.x+body2.sprite.body.x)/2-256;
+			AnimPlay.y =(body1.sprite.body.y+body2.sprite.body.y)/2-256;
+			AnimPlay.animations.play('play',24,false,true);
+				}else{
+			AnimPlay = AstColliAnimGroup.create(0,0,'AstColAnim');
+			AnimPlay.x =(body1.sprite.body.x+body2.sprite.body.x)/2-256;
+			AnimPlay.y =(body1.sprite.body.y+body2.sprite.body.y)/2-256;
+			AnimPlay.animations.add('play');
+			AnimPlay.animations.play('play',24,false,true);
+			}	
+            body1.sprite.kill();
+            body2.sprite.kill();
+            Asteroid_countNum = Asteroid_countNum - 2;
+            for(var i = 0; i < 4; i++){
+                AstType = 0;
+                var singleAsteroid = Asteroids.create(x , y , 'Asteroid_medium');
+                Asteroid_countNum++;
+                singleAsteroid.scale.setTo(0.1, 0.1);
+                singleAsteroid.body.setRectangle(30,30);
+                //singleAsteroid.body.thrust(100);
+				var velocityValue = 200;
+				var rad = Phaser.Math.degToRad(game.rnd.integerInRange(0, 360));
+				singleAsteroid.body.velocity.x = Math.cos(rad) * velocityValue;
+                singleAsteroid.body.velocity.y = Math.sin(rad) * velocityValue;
+                singleAsteroid.body.x += (-0.5 + i)*40;
+                //singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
+                //singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
+                singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
+                singleAsteroid.body.collides([shipCollisionGroup, ufoCollisionGroup, bulletCollisionGroup]);
+                singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
+                singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+                singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+            }
+        }
+        asterDestory.play();
+        checkForRespaw();
+        
+    }
 }
 	
 function bulletHite(body1,body2){
 	if(guard == true){
+	
 		guard = false;
 		var AstType = 1;
 		var size = body2.sprite.scale.x;
 	
 		var x = body2.sprite.body.x;
 		var y = body2.sprite.body.y;
+		
+		var AnimPlay = TorColliAnimGroup.getFirstExists(false);
+		if(AnimPlay != null){
+			AnimPlay.alive = true;
+			AnimPlay.exists = true;
+			AnimPlay.visible = true;
+			AnimPlay.x =body1.sprite.body.x-64;
+			AnimPlay.y =body1.sprite.body.y-64;
+			AnimPlay.animations.play('play',36,false,true);
+			}else{
+			AnimPlay = TorColliAnimGroup.create(0,0,'TorColAnim');
+			AnimPlay.scale.setTo(0.25,0.25);
+			AnimPlay.x =body1.sprite.body.x-64;
+			AnimPlay.y =body1.sprite.body.y-64;
+			AnimPlay.animations.add('play');
+			AnimPlay.animations.play('play',36,false,true);
+			}	
 		
 		body1.sprite.kill();
 		asterDestory.play();
@@ -657,9 +752,15 @@ function bulletHite(body1,body2){
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.1, 0.1);
 				singleAsteroid.body.setRectangle(30,30);
-				singleAsteroid.body.thrust(100);
-				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
+				//singleAsteroid.body.thrust(100);
+				var velocityValue = 200;
+				var rad = Phaser.Math.degToRad(game.rnd.integerInRange(0, 360));
+                singleAsteroid.body.velocity.x = Math.cos(rad) * velocityValue;
+                singleAsteroid.body.velocity.y = Math.sin(rad) * velocityValue;
+                singleAsteroid.body.x += (-0.5 + i)*30;
+				singleAsteroid.body.damping = 0.0;
+				//singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
+				//singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
@@ -670,9 +771,15 @@ function bulletHite(body1,body2){
 				Asteroid_countNum ++;
 				singleAsteroid.scale.setTo(0.05, 0.05);
 				singleAsteroid.body.setRectangle(15,15);
-				singleAsteroid.body.thrust(100);
-				singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
-				singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
+				//singleAsteroid.body.thrust(100);
+				var velocityValue = 400;
+				var rad = Phaser.Math.degToRad(game.rnd.integerInRange(0, 360));
+                singleAsteroid.body.velocity.x = Math.cos(rad) * velocityValue;
+                singleAsteroid.body.velocity.y = Math.sin(rad) * velocityValue;
+                singleAsteroid.body.x += (-0.5 + i)*30;
+				singleAsteroid.body.damping = 0.0;
+				//singleAsteroid.body.velocity.x = game.rnd.integerInRange(-300, 300);
+				//singleAsteroid.body.velocity.y = game.rnd.integerInRange(-300, 300);
 				singleAsteroid.body.setCollisionGroup(asternoidCollisionGroup);
 				singleAsteroid.body.collides([shipCollisionGroup,asternoidCollisionGroup,ufoCollisionGroup,asternoidCollisionGroup_2,bulletCollisionGroup]);
 				singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
@@ -681,6 +788,8 @@ function bulletHite(body1,body2){
 				AstType = 2;
 			}
 		}
+		game.camera.shake(0.01, 50);
+		
 		if(AstType == 0){score = score +20;}
 		else if(AstType ==1) {score = score +50;}
 		else {score = score +100;}
@@ -695,8 +804,8 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		
 		ship.body.x = ship.body.x + Math.cos(rad)*10;
 		ship.body.y = ship.body.y + Math.sin(rad)*10;
-		ship.body.velocity.x = Math.cos(rad) * 600;
-		ship.body.velocity.y = Math.sin(rad) * 600;
+		ship.body.velocity.x = Math.cos(rad) * 300;
+		ship.body.velocity.y = Math.sin(rad) * 300;
 		shipInOrbit = false;
 	}
 //damage change
@@ -710,21 +819,33 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		health = health - 5;
 		//healthText.setText("Planet' life is " + health);
 	}
-	if(health <= 0 ){
+	if(health < 0 ){
+	// end screen
 		health = 0;
-		healthText.visible = true;
-		healthText.setText('GameOver!');
-		healthText.x = game.world.width/2;
-		healthText.y = game.world.height/2-200;
-		healthText.fontSize = 100;
 		planetDestory.play();
+
+		scoreText.visible = false;
+		finalText.visible = true;
+		finalText.setText("Final Score : " + score);
 		
-		//scoreText.setText('GameOver!');
-		scoreText.setText("Your score is " + score);
-		scoreText.x = game.world.width/2;
-		scoreText.y = game.world.height/2-300;
-		scoreText.fontSize = 100;
-		game.time.events.add(Phaser.Timer.SECOND/2, function(){game.destory()}, this);
+		finalExplode.visible = true;
+		finalExplode.alive = true;
+		finalExplode.exists = true;
+		finalExplode.play('explode',24,false,true);
+		
+		planets.forEach(function(singlePlanet){
+			singlePlanet.kill();
+		});
+		dock.kill();
+		
+		gameOverSplash.alive = true;
+		gameOverSplash.exists = true;
+		gameOverSplash.visible = true;
+		game.world.bringToTop(finalText);
+		game.world.bringToTop(gameOverSplash);
+		
+		game.time.events.add(Phaser.Timer.SECOND/2, function(){}, this);
+		
 	}
 //health change
 	if(health <= 80 && health > 60){
@@ -765,9 +886,12 @@ function destory(body1,body2){
 	body2.sprite.kill();
 	}
 function moveToPlanet (planet) { 
-
-		accelerateToObject(ship,planet,200);
-
+	accelerateToObject(ship,planet,200);
+	}
+function moveToShip (ship) { 
+	UFOs.forEach(function(singleUFO){
+		accelerateToObject(singleUFO,ship,100);
+	},this);
 	}
 function accelerateToObject(obj1, obj2, speed) {
 	var distance = ((obj1.body.x - obj2.body.x)*(obj1.body.x - obj2.body.x) + (obj1.body.y - obj2.body.y)*(obj1.body.y - obj2.body.y));
@@ -785,12 +909,30 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function checkForRespaw(){
-	if(Asteroid_countNum <= 3){
+	if(Asteroid_countNum <= 7){ // change this par
 		var deadAsterois = Asteroids.getFirstExists(false);
-		deadAsterois.body.sprite.key = 'Asteroid';
-		deadAsterois.body.sprite.alive = true;
-		deadAsterois.body.sprite.exists = true;
-		deadAsterois.body.sprite.visible = true;
+		if(deadAsterois != null){
+			
+			deadAsterois.body.sprite.alive = true;
+			deadAsterois.body.sprite.exists = true;
+			deadAsterois.body.sprite.visible = true;
+			deadAsterois.body.sprite.key = 'Asteroid';
+			deadAsterois.body.setRectangle(60,60);
+			deadAsterois.scale.setTo(0.2,0.2);
+			deadAsterois.body.setCollisionGroup(asternoidCollisionGroup);
+			deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
+			deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
+			deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+		}else{
+			//shall do something
+			deadAsterois = Asteroids.create(0,0,'Asteroid');
+			deadAsterois.body.setRectangle(60,60);
+			deadAsterois.scale.setTo(0.2,0.2);
+			deadAsterois.body.setCollisionGroup(asternoidCollisionGroup);
+			deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
+			deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
+			deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
+		}
 		if(score%2000 <= 1000){  // range of 5000 and 2000
 			var random = game.rnd.between(1,4);
 			if(random == 1){deadAsterois.body.x = 0;}
@@ -842,6 +984,8 @@ function zoomOut(){
 	}
 }
 function healup(body1,body2){
+	if(shipInOrbit){
+	healApply.play();
 	health = health + 30;
 	if(health <= 80 && health > 60){
 			planets.forEach(function(singlePlanet){
@@ -858,20 +1002,36 @@ function healup(body1,body2){
 		else if(health <= 20&& health > 0){
 			planets.forEach(function(singlePlanet){
 			singlePlanet.body.sprite.loadTexture('planet_20',0);
-		});}
-		/*else if(health <= 0){
-			planets.forEach(function(singlePlanet){
-			singlePlanet.body.sprite.loadTexture('planet_0',0);
-			planetDestory.play();
-			health = 0;
-			healthText.setText('GameOver!');
-			healthText.x = game.world.width/2;
-			healthText.y = game.world.height/2-200;
-			healthText.fontSize = 100;
-		});}*/
-	//healthText.setText("Planet' life is " + health);
+		});} 
+		}
+	else{
+		healPick.play();
+		healBuff.visible = true;
+		shipHealBuff = true;
+	}
 	body2.sprite.kill();
 }
+function directHeal(body1,body2){
+	healApply.play();
+	health = health + 30;
+	if(health <= 80 && health > 60){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_80',0);
+		});}
+		else if(health <= 60 && health > 40){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_60',0);
+		});}
+		else if(health <= 40 && health > 20){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_40',0);
+		});}
+		else if(health <= 20&& health > 0){
+			planets.forEach(function(singlePlanet){
+			singlePlanet.body.sprite.loadTexture('planet_20',0);
+		});} 
+		body1.sprite.kill();
+		}
 function goFullScreen(){
         // setting a background color
         game.stage.backgroundColor = "#ffffff ";
@@ -893,7 +1053,6 @@ function onResize(){
         movingGroup.x = Math.round((game.width-320)/2);
           movingGroup.y = Math.round((game.height-320)/2);        
     }
-
 
 </script>
 </body>
