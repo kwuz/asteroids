@@ -45,6 +45,7 @@ function preload() {
 	game.load.spritesheet('ship','assets/Ship_Spritesheet_0.0625x_90rotate.png',64,64,45);
 	game.load.spritesheet('AstColAnim','assets/AstroidDestruction.png',512,512,17);
 	game.load.spritesheet('TorColAnim','assets/TorpedeoExplosion_Spritesheet.png',512,512,15);
+	game.load.spritesheet('FinalExplode','assets/PlanetExplosion_Spritesheet.png',1300,1300,35);
 	
 	game.load.audio('blaster', 'assets/asteroids_shootsound.wav');
 	game.load.audio('asternoidDestory', 'assets/asteroids_asteroidbreak.wav');
@@ -68,6 +69,7 @@ var shipHealBuff = false;
 var splash;
 var dock;
 var healBuff;
+var finalExplode;
 var bulletInterval = 0;
 var groupInterval = 0;
 var groupCounter = 0;
@@ -121,38 +123,28 @@ function create() {
 	game.add.image(0,0,'background');//add background
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
-	//game.physics.p2.restitution = 1.0;
+	//game.physics.p2.restitution = 0.0
+	//create splash
 	splash = game.add.sprite(0,0,'splash');
+	//create dock
 	dock = game.add.sprite(game.world.width/2-100,game.world.height/2-100,'Dock');
 	dock.scale.setTo(0.1,0.1);
-	
 	dock.visible = false;
+	//create final expppppppppppppppppppppppppppppppppplllllllllllllllllllllllllllllllloooooooooooooooooooooooodddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeee!!!!!!!!!!!!!!!!!!
+	finalExplode = game.add.sprite(game.world.width/2-300,game.world.height/2-300,'FinalExplode');
+	finalExplode.scale.setTo(0.5,0.5);
+	finalExplode.animations.add('explode');
+	finalExplode.kill();
 	//create sound
 	blaster = game.add.audio('blaster',1); //use the 1 to change volume, interval is (0,1)
 	asterDestory = game.add.audio('asternoidDestory',1);
 	planetHit = game.add.audio('planetHit',1);
-	planetDestory = game.add.audio('planetDestory',11);
+	planetDestory = game.add.audio('planetDestory',1);
 	BackgroundMusic = game.add.audio('backGroundMusic',1);
 	healPick = game.add.audio('healthPick',1);
 	healApply = game.add.audio('healthApply',1);
 	BackgroundMusic.loop = true;
-	//BackgroundMusic_2 = game.add.audio('backGroundMusic_2');
-	//BackgroundMusic_2.loop = true;
-	//BackgroundMusic_3 = game.add.audio('backGroundMusic_3');
-	//BackgroundMusic_3.loop = true;
 	BackgroundMusic.play();
-	//BackgroundMusic_2.play();
-	//BackgroundMusic_3.play();
-	//BackgroundMusic_2.pause();
-	//BackgroundMusic_3.pause();
-	//
-	//create spritesheet
-	/*TorpedoSprite = game.add.tileSprite(game.world.width/2,game.world.height/2,32,32,'Torpedo');
-	TorpedoSprite.animations.add('glow');
-	TorpedoSprite.animations.play('glow', 50, true);
-	game.add.tween(TorpedoSprite).to({ x: game.width }, 10000, Phaser.Easing.Linear.None, true);
-    game.physics.p2.restitution = 0.0;*/
-
 	shipCollisionGroup = game.physics.p2.createCollisionGroup();
 	asternoidCollisionGroup = game.physics.p2.createCollisionGroup();
 	bulletCollisionGroup = game.physics.p2.createCollisionGroup();
@@ -220,6 +212,11 @@ function create() {
 	singleAsteroid.body.velocity.x = -150;
 	singleAsteroid.body.velocity.y = -150;
 	
+	singleAsteroid = Asteroids.create(214,790,'Asteroid');
+	singleAsteroid.body.velocity.x = -150;
+	singleAsteroid.body.velocity.y = -150;
+	singleAsteroid.body.sprite.kill();
+	
 	Asteroids.forEach(function(singleAsteroid){
 		singleAsteroid.scale.setTo(0.2,0.2);
 		singleAsteroid.body.setRectangle(60,60);
@@ -228,6 +225,7 @@ function create() {
 		singleAsteroid.body.collides(planetCollisionGroup, destoryNupdate, this);
 		singleAsteroid.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		singleAsteroid.body.rotateLeft(game.rnd.integerInRange(100, 200));
+		//singleAsteroid.body.mass = 0.1;
 		singleAsteroid.body.damping = 0.0;
 		singleAsteroid.kill();
 	});
@@ -476,6 +474,7 @@ function update() {
 		}else if(singleAsteroid.body.y < 0){
 			singleAsteroid.body.y = game.world.height;
 		}
+		singleAsteroid.body.thrust(10);
 	});
 	
 	UFOs.forEach( function (ufo){
@@ -748,7 +747,7 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		health = health - 5;
 		//healthText.setText("Planet' life is " + health);
 	}
-	if(health <= 0 ){
+	if(health < 0 ){
 		health = 0;
 		healthText.visible = true;
 		healthText.setText('GameOver!');
@@ -762,7 +761,19 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		scoreText.x = game.world.width/2;
 		scoreText.y = game.world.height/2-300;
 		scoreText.fontSize = 100;
+		
+		finalExplode.visible = true;
+		finalExplode.alive = true;
+		finalExplode.exists = true;
+		finalExplode.play('explode',24,false,true);
+		
+		planets.forEach(function(singlePlanet){
+			singlePlanet.kill();
+		});
+		
 		game.time.events.add(Phaser.Timer.SECOND/2, function(){}, this);
+		
+		game.debug.text('UDCM',30,500);
 	}
 //health change
 	if(health <= 80 && health > 60){
@@ -826,7 +837,7 @@ function accelerateToObject(obj1, obj2, speed) {
 }
 
 function checkForRespaw(){
-	if(Asteroid_countNum <= 4){
+	if(Asteroid_countNum <= 5){
 		var deadAsterois = Asteroids.getFirstExists(false);
 		if(deadAsterois != null){
 			deadAsterois.body.sprite.key = 'Asteroid';
