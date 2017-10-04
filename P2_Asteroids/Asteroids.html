@@ -26,6 +26,7 @@ function preload() {
     game.scale.setShowAll();
 	//load art assets
     game.load.image('background', 'assets/background.jpg');
+	game.load.image('gameover','assets/gameover.png');
 	game.load.image('splash','assets/splash.png');
 	game.load.image('healBuff','assets/heal_glow.png');
 	game.load.image('Dock','assets/PlannetDock.png');
@@ -69,6 +70,7 @@ var shipHealBuff = false;
 var splash;
 var dock;
 var healBuff;
+var gameOverSplash;
 var finalExplode;
 var bulletInterval = 0;
 var groupInterval = 0;
@@ -124,6 +126,10 @@ function create() {
 	game.physics.startSystem(Phaser.Physics.P2JS); //Detailed physic system
 	game.physics.p2.setImpactEvents(true);// need this line to make score happen
 	//game.physics.p2.restitution = 0.0
+	//create game over
+	gameOverSplash = game.add.sprite(0,0,'gameover');
+	gameOverSplash.scale.setTo(0.5,0.5);
+	gameOverSplash.kill();
 	//create splash
 	splash = game.add.sprite(0,0,'splash');
 	//create dock
@@ -167,6 +173,15 @@ function create() {
 		align: "center" });
 	scoreText.anchor.setTo(0.5, 0.5);
 	scoreText.visible = false;
+	
+	finalText = game.add.text(game.world.width/2, game.world.height/2-300, "Final Score : " + score, { 
+		font: "100px Arial", 
+		fill: "#ffffff", 
+		align: "center" });
+	finalText.anchor.setTo(0.5, 0.5);
+	finalText.visible = false;
+	
+
 	//create anim group
 	
 	// create ship
@@ -312,6 +327,11 @@ function create() {
 		if(singleUFO.alive == false && shipHealBuff == false){
 			singleUFO.body.x = game.rnd.integerInRange(0,1024);
 			singleUFO.body.y = game.rnd.integerInRange(0,800);
+			var random = game.rnd.between(1,4);
+			if(random == 1){singleUFO.body.x = 0;}
+			if(random == 2){singleUFO.body.y =0;}
+			if(random == 3){singleUFO.body.x = game.world.width;}
+			if(random == 4){singleUFO.body.y = game.world.height;}
 			singleUFO.body.velocity.x = game.rnd.integerInRange(-300, 300);
 			singleUFO.body.velocity.y = game.rnd.integerInRange(-300, 300);
 			singleUFO.visible = true;
@@ -750,19 +770,13 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		//healthText.setText("Planet' life is " + health);
 	}
 	if(health < 0 ){
+	// end screen
 		health = 0;
-		healthText.visible = true;
-		healthText.setText('GameOver!');
-		healthText.x = game.world.width/2;
-		healthText.y = game.world.height/2-200;
-		healthText.fontSize = 100;
 		planetDestory.play();
-		
-		//scoreText.setText('GameOver!');
-		scoreText.setText("Your score is " + score);
-		scoreText.x = game.world.width/2;
-		scoreText.y = game.world.height/2-300;
-		scoreText.fontSize = 100;
+
+		scoreText.visible = false;
+		finalText.visible = true;
+		finalText.setText("Final Score : " + score);
 		
 		finalExplode.visible = true;
 		finalExplode.alive = true;
@@ -772,6 +786,13 @@ function destoryNupdate(body1,body2){	// call this function to damage
 		planets.forEach(function(singlePlanet){
 			singlePlanet.kill();
 		});
+		dock.kill();
+		
+		gameOverSplash.alive = true;
+		gameOverSplash.exists = true;
+		gameOverSplash.visible = true;
+		game.world.bringToTop(finalText);
+		game.world.bringToTop(gameOverSplash);
 		
 		game.time.events.add(Phaser.Timer.SECOND/2, function(){}, this);
 		
