@@ -14,6 +14,14 @@
 </head>
 <body>
 
+<div style="margin-right:2px;">
+	<img src="assets/cabinet_art_left.png" align="left" width="230px" height="606px">
+</div>
+
+<div style="margin-left:10px;">
+	<img src="assets/cabinet_art_right.png" align="right" width="264px" height="606px">
+</div>
+
 <script type="text/javascript">
 
 var game = new Phaser.Game(1024, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update,resize:onResize });
@@ -862,12 +870,17 @@ function checkForRespaw(){
 	if(Asteroid_countNum <= 5){
 		var deadAsterois = Asteroids.getFirstExists(false);
 		if(deadAsterois != null){
-			deadAsterois.body.sprite.key = 'Asteroid';
-			deadAsterois.body.setRectangle(60,60);
-			deadAsterois.scale.setTo(0.2,0.2);
+			
 			deadAsterois.body.sprite.alive = true;
 			deadAsterois.body.sprite.exists = true;
 			deadAsterois.body.sprite.visible = true;
+			deadAsterois.body.sprite.key = 'Asteroid';
+			deadAsterois.body.setRectangle(60,60);
+			deadAsterois.scale.setTo(0.2,0.2);
+			deadAsterois.body.setCollisionGroup(asternoidCollisionGroup);
+		deadAsterois.body.collides([shipCollisionGroup,ufoCollisionGroup,bulletCollisionGroup]);
+		deadAsterois.body.collides(planetCollisionGroup, destoryNupdate, this);
+		deadAsterois.body.collides(asternoidCollisionGroup, AsteroidCollide, this);
 		}else{
 			//shall do something
 		}
