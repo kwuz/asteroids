@@ -863,6 +863,7 @@ function checkForRespaw(){
 		var deadAsterois = Asteroids.getFirstExists(false);
 		if(deadAsterois != null){
 			deadAsterois.body.sprite.key = 'Asteroid';
+			deadAsterois.body.setRectangle(60,60);
 			deadAsterois.body.sprite.alive = true;
 			deadAsterois.body.sprite.exists = true;
 			deadAsterois.body.sprite.visible = true;
