@@ -538,7 +538,14 @@ function update() {
 		if(singleAsteroid.body.sprite.key == 'Asteroid_small' && singleAsteroid.body.sprite.alive == true){
 			num_s_Asteroid++;
 		}
-		singleAsteroid.body.thrust(10);
+		var asteroidPace = Math.sqrt(singleAsteroid.body.velocity.x * singleAsteroid.body.velocity.x  + singleAsteroid.body.velocity.y * singleAsteroid.body.velocity.y);
+		if (asteroidPace <= 100){
+			var amplifier = 200 / asteroidPace;
+			singleAsteroid.body.velocity.x = singleAsteroid.body.velocity.x * amplifier;
+			singleAsteroid.body.velocity.y = singleAsteroid.body.velocity.y * amplifier;
+		}
+
+		//singleAsteroid.body.thrust(10);
 	});
 	
 	UFOs.forEach( function (ufo){
